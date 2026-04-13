@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SelemExpress – Your Shoe Universe</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --nav:       #1a1a1a;
+    --accent:    #f5c518;
+    --accent-dk: #d4a800;
+    --bg:        #f9f9f9;
+    --surface:   #ffffff;
+    --text-hi:   #ffffff;
+    --text-1:    #1a1a1a;
+    --text-2:    #6b6b6b;
+    --border:    #ebebeb;
+    --soft:      #f3f3f3;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,.07);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.10);
+    --radius:    14px;
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text-1); overflow-x:hidden; -webkit-font-smoothing:antialiased; }
+
+  /* ── TOP NAV ── */
+  #top-nav { position:sticky; top:0; z-index:110; background:var(--nav); transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .32s ease; box-shadow:0 1px 0 rgba(255,255,255,.06); }
+  #top-nav.hidden { transform:translateY(-58px); opacity:0; pointer-events:none; }
+  .nav-inner { height:58px; display:flex; align-items:center; padding:0 18px; gap:12px; }
+  .nav-logo { font-family:'Baloo 2',cursive; font-size:1.52rem; font-weight:800; color:var(--text-hi); white-space:nowrap; flex-shrink:0; letter-spacing:-.3px; }
+  .nav-logo span { color:var(--accent); }
+  .nav-icons { display:flex; gap:20px; margin-left:auto; flex-shrink:0; }
+  .nav-icons a { color:rgba(255,255,255,.7); text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:.6rem; font-weight:700; letter-spacing:.2px; transition:color .2s; }
+  .nav-icons a:hover { color:#fff; }
+  .nav-icons a .ic { font-size:1.22rem; line-height:1; }
+
+  /* ── SEARCH ── */
+  #search-sticky { position:sticky; top:0; z-index:109; background:var(--surface); padding:9px 16px 10px; border-bottom:1px solid var(--border); box-shadow:0 1px 6px rgba(0,0,0,.05); }
+  .search-bar { display:flex; align-items:center; background:var(--soft); border-radius:10px; border:1.5px solid var(--border); overflow:hidden; transition:border-color .2s,box-shadow .2s; }
+  .search-bar:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px rgba(245,197,24,.12); }
+  .search-bar input { flex:1; border:none; outline:none; padding:10px 14px; font-size:.9rem; font-family:'Nunito',sans-serif; background:transparent; color:var(--text-1); }
+  .search-bar input::placeholder { color:var(--text-2); }
+  .search-bar button { background:var(--accent); border:none; padding:10px 16px; font-size:1rem; cursor:pointer; flex-shrink:0; transition:background .15s; }
+  .search-bar button:active { background:var(--accent-dk); }
+
+  /* ── SECTION HEADER ── */
+  .sec { font-family:'Baloo 2',cursive; font-size:1.05rem; font-weight:800; padding:20px 18px 10px; display:flex; align-items:center; gap:9px; color:var(--text-1); }
+  .sec .bar { width:3px; height:17px; border-radius:3px; background:var(--accent); }
+
+  /* ── STORES ── */
+  .stores-scroll { display:flex; gap:14px; overflow-x:auto; padding:2px 18px 18px; scrollbar-width:none; }
+  .stores-scroll::-webkit-scrollbar { display:none; }
+  .store-item { display:flex; flex-direction:column; align-items:center; gap:6px; flex-shrink:0; cursor:pointer; }
+  .store-ring { width:66px; height:66px; border-radius:50%; padding:2px; background:var(--nav); transition:transform .2s; }
+  .store-item:active .store-ring { transform:scale(.93); }
+  .store-inner { width:100%; height:100%; border-radius:50%; background:#fff; border:2px solid #fff; overflow:hidden; }
+  .store-inner img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+  .store-item span { font-size:.64rem; font-weight:700; color:var(--text-2); text-align:center; max-width:66px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* ── HERO SLIDER ── */
+  .hero-slider { position:relative; overflow:hidden; height:190px; margin:0 0 4px; }
+  @media(min-width:580px){ .hero-slider{ height:270px; } }
+  @media(min-width:900px){ .hero-slider{ height:360px; } }
+  .slide { position:absolute; inset:0; display:flex; align-items:center; opacity:0; transition:opacity .75s ease; overflow:hidden; }
+  .slide.active { opacity:1; z-index:1; }
+  .slide-bg-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:brightness(.52); }
+  .slide-overlay { position:absolute; inset:0; background: linear-gradient(90deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.3) 55%,transparent 80%), linear-gradient(0deg,rgba(0,0,0,.3) 0%,transparent 40%); }
+  .slide-content { position:relative; z-index:2; color:#fff; padding:0 24px; max-width:340px; }
+  .slide-tag { display:inline-block; background:var(--accent); color:#1a1a1a; font-size:.6rem; font-weight:800; padding:3px 10px; border-radius:5px; margin-bottom:8px; text-transform:uppercase; letter-spacing:1.2px; }
+  .slide-content h2 { font-family:'Baloo 2',cursive; font-size:1.6rem; font-weight:800; line-height:1.1; margin-bottom:5px; letter-spacing:-.2px; }
+  .slide-content p { font-size:.8rem; opacity:.82; margin-bottom:14px; line-height:1.45; }
+  .slide-btn { display:inline-block; background:#fff; color:#1a1a1a; padding:8px 20px; border-radius:7px; font-size:.8rem; font-weight:800; text-decoration:none; box-shadow:0 2px 8px rgba(0,0,0,.2); transition:transform .15s; }
+  .slide-btn:active { transform:scale(.97); }
+  .slider-dots { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:2; }
+  .dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.38); cursor:pointer; transition:background .3s,transform .3s; }
+  .dot.active { background:#fff; transform:scale(1.4); }
+
+  /* ── FEED WRAPPER: grid + posters sit here ── */
+  #feed-wrapper { padding:4px 12px 0; display:flex; flex-direction:column; gap:0; }
+
+  /* ── PRODUCT ROWS CHUNK ── */
+  .feed-chunk { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:10px; }
+  @media(min-width:700px){ .feed-chunk{ grid-template-columns:repeat(4,1fr); } }
+  @media(min-width:1000px){ .feed-chunk{ grid-template-columns:repeat(5,1fr); } }
+
+  .feed-card { background:var(--surface); border-radius:var(--radius); overflow:hidden; cursor:pointer; position:relative; box-shadow:var(--shadow-sm); transition:transform .18s cubic-bezier(.4,0,.2,1),box-shadow .18s; will-change:transform; }
+  .feed-card:hover  { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+  .feed-card:active { transform:scale(.97); box-shadow:var(--shadow-sm); }
+  .feed-img { width:100%; aspect-ratio:1/1; object-fit:cover; display:block; transition:transform .38s ease; border-radius:var(--radius) var(--radius) 0 0; }
+  .feed-card:hover .feed-img { transform:scale(1.04); }
+  .feed-price { padding:7px 9px 10px; font-family:'Baloo 2',cursive; font-size:.88rem; font-weight:800; color:var(--text-1); }
+  .fav-btn { position:absolute; top:8px; right:8px; background:rgba(255,255,255,.93); border:none; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-size:.9rem; cursor:pointer; box-shadow:0 1px 5px rgba(0,0,0,.14); transition:transform .15s; }
+  .fav-btn:active { transform:scale(1.22); }
+
+  /* ── STORE POSTER ── */
+  .store-poster {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    /* 2 rows tall: each row is roughly a square card + gap. */
+    aspect-ratio: 3/2;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-md);
+    transition: transform .18s;
+  }
+  .store-poster:active { transform: scale(.98); }
+
+  .poster-bg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: brightness(.55);
+    transition: transform .5s ease;
+  }
+  .store-poster:hover .poster-bg { transform: scale(1.03); }
+
+  /* deep gradient from bottom for text legibility */
+  .poster-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(0,0,0,.38) 0%,
+      rgba(0,0,0,.08) 38%,
+      rgba(0,0,0,.08) 55%,
+      rgba(0,0,0,.72) 100%
+    );
+  }
+
+  /* store logo + name — top left */
+  .poster-store {
+    position: absolute; top: 12px; left: 12px;
+    display: flex; align-items: center; gap: 8px;
+    z-index: 2;
+  }
+  .poster-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.85);
+    overflow: hidden; flex-shrink: 0;
+    background: #fff;
+  }
+  .poster-avatar img { width:100%; height:100%; object-fit:cover; }
+  .poster-store-name {
+    font-family: 'Baloo 2', cursive;
+    font-size: .82rem; font-weight: 800;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,.4);
+  }
+  .poster-store-tag {
+    font-size: .6rem; font-weight: 700;
+    color: rgba(255,255,255,.75);
+    display: block; margin-top: 1px;
+  }
+
+  /* heart — top right */
+  .poster-heart {
+    position: absolute; top: 12px; right: 12px;
+    z-index: 2;
+    background: rgba(255,255,255,.18);
+    backdrop-filter: blur(6px);
+    border: none; border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; cursor: pointer;
+    transition: transform .15s, background .15s;
+  }
+  .poster-heart:active { transform: scale(1.25); background: rgba(255,255,255,.32); }
+
+  /* offer text — bottom */
+  .poster-body {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 14px 14px 16px;
+    z-index: 2;
+  }
+  .poster-badge {
+    display: inline-block;
+    background: var(--accent); color: #1a1a1a;
+    font-size: .56rem; font-weight: 800;
+    padding: 2px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+  .poster-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.22rem; font-weight: 800;
+    color: #fff; line-height: 1.15;
+    text-shadow: 0 1px 6px rgba(0,0,0,.3);
+    margin-bottom: 4px;
+  }
+  .poster-sub {
+    font-size: .72rem; color: rgba(255,255,255,.82);
+    font-weight: 600;
+  }
+  .poster-cta {
+    display: inline-block; margin-top: 10px;
+    background: #fff; color: #1a1a1a;
+    padding: 7px 18px; border-radius: 7px;
+    font-size: .76rem; font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
+    transition: transform .15s;
+  }
+  .poster-cta:active { transform: scale(.97); }
+
+  /* ── LOAD SPINNER ── */
+  .load-spinner { text-align:center; padding:24px 0 32px; color:var(--text-2); font-size:.78rem; font-weight:700; letter-spacing:.3px; }
+
+  /* ── FOOTER ── */
+  footer { background:var(--nav); color:var(--text-2); padding:28px 18px 96px; font-size:.78rem; margin-top:16px; }
+  footer .fl { font-family:'Baloo 2',cursive; font-size:1.35rem; font-weight:800; color:var(--text-hi); margin-bottom:6px; }
+  footer .fl span { color:var(--accent); }
+  footer p { color:#555; line-height:1.6; }
+  footer .links { display:flex; flex-wrap:wrap; gap:12px; margin-top:14px; }
+  footer .links a { color:#484848; text-decoration:none; font-size:.74rem; }
+  footer .links a:hover { color:var(--text-hi); }
+
+  /* ── BOTTOM NAV (5 items) ── */
+  .bot-nav { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); display:flex; z-index:110; box-shadow:0 -2px 12px rgba(0,0,0,.07); padding-bottom:env(safe-area-inset-bottom); }
+  .bot-nav a { flex:1; display:flex; flex-direction:column; align-items:center; padding:9px 0 6px; font-size:.55rem; font-weight:800; letter-spacing:.2px; color:#c0c0c0; text-decoration:none; transition:color .18s,transform .18s; -webkit-tap-highlight-color:transparent; }
+  .bot-nav a .ic { font-size:1.18rem; line-height:1; }
+  .bot-nav a.active { color:var(--accent); }
+  .bot-nav a:active { transform:scale(.88); }
+
+  /* ── STORE MODAL ── */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; align-items:flex-end; backdrop-filter:blur(2px); }
+  .modal-overlay.open { display:flex; }
+  .modal-sheet { background:var(--surface); border-radius:20px 20px 0 0; width:100%; max-height:80vh; overflow-y:auto; padding:16px; animation:slideUp .3s cubic-bezier(.4,0,.2,1); }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  .modal-handle { width:36px; height:4px; background:#ddd; border-radius:2px; margin:0 auto 14px; }
+  .modal-store-hd { display:flex; align-items:center; gap:12px; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .m-logo { width:54px; height:54px; border-radius:50%; overflow:hidden; border:2px solid var(--nav); flex-shrink:0; }
+  .m-logo img { width:100%; height:100%; object-fit:cover; }
+  .m-info h3 { font-family:'Baloo 2',cursive; font-size:1.02rem; font-weight:800; }
+  .m-info p  { font-size:.7rem; color:var(--text-2); margin-top:1px; }
+  .m-close { margin-left:auto; background:var(--soft); border:none; border-radius:50%; width:30px; height:30px; font-size:.88rem; cursor:pointer; }
+  .modal-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
+  .modal-p-card { background:var(--soft); border-radius:10px; overflow:hidden; cursor:pointer; }
+  .modal-p-card img { width:100%; aspect-ratio:1/1; object-fit:cover; display:block; }
+  .modal-p-card .mp { padding:5px 7px 8px; font-family:'Baloo 2',cursive; font-size:.84rem; font-weight:800; }
+
+  /* ── TOAST ── */
+  .toast { position:fixed; bottom:76px; left:50%; transform:translateX(-50%) translateY(8px); background:var(--nav); color:#fff; padding:9px 20px; border-radius:8px; font-size:.78rem; font-weight:700; opacity:0; pointer-events:none; transition:opacity .25s,transform .25s; z-index:400; white-space:nowrap; box-shadow:0 4px 14px rgba(0,0,0,.18); }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div id="top-nav">
+  <div class="nav-inner">
+    <div class="nav-logo">Selem<span>Express</span></div>
+    <div class="nav-icons">
+      <a href="#"><span class="ic">🔔</span>Notifs</a>
+      <a href="#"><span class="ic">👤</span>Account</a>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH BAR -->
+<div id="search-sticky">
+  <div class="search-bar">
+    <input type="text" placeholder="Search shoes, brands, stores…">
+    <button>🔍</button>
+  </div>
+</div>
+
+<!-- SHOPS YOU KNOW -->
+<div class="sec"><div class="bar"></div>Shops You Know</div>
+<div class="stores-scroll" id="stores-scroll"></div>
+
+<!-- HERO SLIDER -->
+<div class="hero-slider" id="hero-slider"></div>
+
+<!-- FEED: grid chunks + posters injected between them -->
+<div id="feed-wrapper"></div>
+<div class="load-spinner" id="load-spinner">Loading more…</div>
+
+<footer>
+  <div class="fl">Selem<span>Express</span></div>
+  <p>Tunisia's #1 online shoe marketplace.<br>Top brands · Fast delivery · Easy returns.</p>
+  <div class="links">
+    <a href="#">About</a><a href="#">Sell With Us</a>
+    <a href="#">Help</a><a href="#">Returns</a><a href="#">Privacy</a>
+  </div>
+  <p style="margin-top:14px;font-size:.67rem;color:#3a3a3a">© 2026 SelemExpress. All rights reserved.</p>
+</footer>
+
+<!-- BOTTOM NAV — 5 tabs -->
+<div class="bot-nav">
+  <a href="#" class="active"><span class="ic">🏠</span>Home</a>
+  <a href="#"><span class="ic">🔍</span>Explore</a>
+  <a href="#"><span class="ic">🛒</span>Cart</a>
+  <a href="#"><span class="ic">🤍</span>Saved</a>
+  <a href="#"><span class="ic">🏪</span>Following</a>
+</div>
+
+<!-- STORE MODAL -->
+<div class="modal-overlay" id="store-modal" onclick="closeStoreModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-store-hd" id="modal-hd"></div>
+    <div class="modal-grid" id="modal-grid"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast-el"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────
+const stores=[
+  {id:1,name:"StepUp TN",  tag:"Sneakers",img:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&q=70"},
+  {id:2,name:"Urban Sole", tag:"Casual",  img:"https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=150&q=70"},
+  {id:3,name:"RunFast",    tag:"Sport",   img:"https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=150&q=70"},
+  {id:4,name:"KidzStep",   tag:"Kids",    img:"https://images.unsplash.com/photo-1607522370275-f6fd0c19bca4?w=150&q=70"},
+  {id:5,name:"LuxFeet",    tag:"Luxury",  img:"https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=150&q=70"},
+  {id:6,name:"BootZone",   tag:"Boots",   img:"https://images.unsplash.com/photo-1542219550-37153d387c27?w=150&q=70"},
+  {id:7,name:"SandaShop",  tag:"Sandals", img:"https://images.unsplash.com/photo-1603487742131-4160ec999306?w=150&q=70"},
+  {id:8,name:"ClassicStep",tag:"Classic", img:"https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=150&q=70"},
+];
+
+// Posters — store special offers
+const posters=[
+  {
+    store: stores[0],
+    bg:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80",
+    badge:"Flash Sale",
+    title:"Up to 50% Off All Sneakers",
+    sub:"Today only · Free delivery on orders over 80 TND",
+    cta:"Shop the Sale"
+  },
+  {
+    store: stores[2],
+    bg:"https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800&q=80",
+    badge:"New Drop",
+    title:"Summer Running Collection",
+    sub:"Engineered for speed · Limited stock",
+    cta:"Discover Now"
+  },
+  {
+    store: stores[4],
+    bg:"https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=800&q=80",
+    badge:"Exclusive",
+    title:"Luxury Heels — Up to 30% Off",
+    sub:"Crafted leather · Premium finish",
+    cta:"View Collection"
+  },
+  {
+    store: stores[5],
+    bg:"https://images.unsplash.com/photo-1542219550-37153d387c27?w=800&q=80",
+    badge:"Weekend Deal",
+    title:"Buy 2 Boots, Get 1 Free",
+    sub:"Mix & match from our full range",
+    cta:"Shop Boots"
+  },
+  {
+    store: stores[1],
+    bg:"https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=800&q=80",
+    badge:"Restocked",
+    title:"Classics Are Back in Stock",
+    sub:"Old Skool · Stan Smith · Chuck Taylor",
+    cta:"Browse Now"
+  },
+  {
+    store: stores[6],
+    bg:"https://images.unsplash.com/photo-1603487742131-4160ec999306?w=800&q=80",
+    badge:"Summer Edit",
+    title:"Sandals from 29 TND",
+    sub:"Easy-wear · All-day comfort",
+    cta:"Explore Sandals"
+  },
+];
+
+const slides=[
+  {tag:"Flash Sale",title:"Up to 60% Off Sneakers",sub:"Limited time – grab yours now!",btn:"Shop Now",img:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=900&q=80"},
+  {tag:"New Arrival",title:"Summer Sandals Are Here",sub:"Cool styles for hot days.",btn:"Explore",img:"https://images.unsplash.com/photo-1603487742131-4160ec999306?w=900&q=80"},
+  {tag:"Top Picks",title:"Running Shoes Collection",sub:"Engineered for your best run.",btn:"Discover",img:"https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=900&q=80"},
+  {tag:"Exclusive",title:"Luxury Leather Boots",sub:"Crafted for the discerning.",btn:"View",img:"https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=900&q=80"},
+];
+
+const shoePool=[
+  {price:189,img:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=75"},
+  {price:220,img:"https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&q=75"},
+  {price:130,img:"https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=400&q=75"},
+  {price:95, img:"https://images.unsplash.com/photo-1579338559194-a162d19bf842?w=400&q=75"},
+  {price:88, img:"https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=400&q=75"},
+  {price:99, img:"https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=400&q=75"},
+  {price:195,img:"https://images.unsplash.com/photo-1542219550-37153d387c27?w=400&q=75"},
+  {price:79, img:"https://images.unsplash.com/photo-1603487742131-4160ec999306?w=400&q=75"},
+  {price:75, img:"https://images.unsplash.com/photo-1607522370275-f6fd0c19bca4?w=400&q=75"},
+  {price:210,img:"https://images.unsplash.com/photo-1539185441755-769473a23570?w=400&q=75"},
+  {price:155,img:"https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=400&q=75"},
+  {price:78, img:"https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&q=75"},
+  {price:62, img:"https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=400&q=75"},
+  {price:195,img:"https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=400&q=75"},
+  {price:38, img:"https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=75"},
+  {price:145,img:"https://images.unsplash.com/photo-1465453869711-7e174808ace9?w=400&q=75"},
+  {price:112,img:"https://images.unsplash.com/photo-1510771463146-e89e6e86560e?w=400&q=75"},
+  {price:169,img:"https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=400&q=75"},
+];
+
+// ── UTILS ─────────────────────────────────────────────────
+function toast(msg){const t=document.getElementById('toast-el');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+function toggleFav(btn){btn.textContent=btn.textContent==='🤍'?'❤️':'🤍';}
+
+// ── STORES ────────────────────────────────────────────────
+const ss=document.getElementById('stores-scroll');
+stores.forEach(s=>{
+  const d=document.createElement('div'); d.className='store-item';
+  d.innerHTML=`<div class="store-ring"><div class="store-inner"><img src="${s.img}" alt="${s.name}" loading="lazy"></div></div><span>${s.name}</span>`;
+  d.addEventListener('click',()=>openStoreModal(s));
+  ss.appendChild(d);
+});
+
+// ── SLIDER ────────────────────────────────────────────────
+const hs=document.getElementById('hero-slider');
+slides.forEach((sl,i)=>{
+  const d=document.createElement('div'); d.className='slide'+(i===0?' active':'');
+  d.innerHTML=`<img class="slide-bg-img" src="${sl.img}" alt="" loading="${i===0?'eager':'lazy'}">
+    <div class="slide-overlay"></div>
+    <div class="slide-content">
+      <span class="slide-tag">${sl.tag}</span>
+      <h2>${sl.title}</h2>
+      <p>${sl.sub}</p>
+      <a href="#" class="slide-btn" onclick="toast('Shopping…');return false">${sl.btn} →</a>
+    </div>`;
+  hs.appendChild(d);
+});
+const ddots=document.createElement('div'); ddots.className='slider-dots';
+slides.forEach((_,i)=>{
+  const d=document.createElement('div'); d.className='dot'+(i===0?' active':'');
+  d.addEventListener('click',()=>go(i)); ddots.appendChild(d);
+});
+hs.appendChild(ddots);
+let cur=0;
+function go(n){
+  document.querySelectorAll('.slide').forEach((s,i)=>s.classList.toggle('active',i===n));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===n));
+  cur=n;
+}
+setInterval(()=>go((cur+1)%slides.length),3200);
+
+// ── INFINITE FEED with POSTERS ────────────────────────────
+const feedWrapper=document.getElementById('feed-wrapper');
+let totalCards=0;      // tracks total product cards rendered
+let posterIndex=0;     // which poster to show next
+let loading=false;
+const CHUNK_SIZE=18;   // 6 rows × 3 cols = 18 cards per chunk
+const ROWS_PER_CHUNK=6;
+const priceJitter=[0,-10,10,-5,15,-15,5,-20,20,8,-8,12];
+
+function getShoe(i){
+  const base=shoePool[i%shoePool.length];
+  return{price:base.price+priceJitter[i%priceJitter.length],img:base.img};
+}
+
+function makePoster(p){
+  const el=document.createElement('div');
+  el.className='store-poster';
+  el.innerHTML=`
+    <img class="poster-bg" src="${p.bg}" alt="${p.store.name} offer" loading="lazy">
+    <div class="poster-overlay"></div>
+
+    <!-- top-left: store identity -->
+    <div class="poster-store">
+      <div class="poster-avatar"><img src="${p.store.img}" alt="${p.store.name}"></div>
+      <div>
+        <span class="poster-store-name">${p.store.name}</span>
+        <span class="poster-store-tag">${p.store.tag}</span>
+      </div>
+    </div>
+
+    <!-- top-right: heart -->
+    <button class="poster-heart" onclick="event.stopPropagation();toggleFav(this)">🤍</button>
+
+    <!-- bottom: offer copy -->
+    <div class="poster-body">
+      <span class="poster-badge">${p.badge}</span>
+      <div class="poster-title">${p.title}</div>
+      <div class="poster-sub">${p.sub}</div>
+      <a href="#" class="poster-cta" onclick="toast('Opening ${p.store.name}…');return false">${p.cta} →</a>
+    </div>`;
+  return el;
+}
+
+function loadMoreFeed(){
+  if(loading) return;
+  loading=true;
+  document.getElementById('load-spinner').style.display='block';
+
+  setTimeout(()=>{
+    // — 1. inject a poster BEFORE each new chunk (except the very first)
+    if(totalCards > 0){
+      const poster=posters[posterIndex % posters.length];
+      feedWrapper.appendChild(makePoster(poster));
+      posterIndex++;
+    }
+
+    // — 2. build a chunk of 18 product cards
+    const chunk=document.createElement('div');
+    chunk.className='feed-chunk';
+
+    for(let i=0;i<CHUNK_SIZE;i++){
+      const shoe=getShoe(totalCards+i);
+      const card=document.createElement('div');
+      card.className='feed-card';
+      card.innerHTML=`
+        <img class="feed-img" src="${shoe.img}" alt="shoe" loading="lazy">
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav(this)">🤍</button>
+        <div class="feed-price">${shoe.price} TND</div>`;
+      chunk.appendChild(card);
+    }
+    feedWrapper.appendChild(chunk);
+    totalCards+=CHUNK_SIZE;
+
+    loading=false;
+    document.getElementById('load-spinner').style.display='none';
+  },280);
+}
+
+// Intersection Observer
+const spinnerEl=document.getElementById('load-spinner');
+new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting) loadMoreFeed();
+},{rootMargin:'240px'}).observe(spinnerEl);
+loadMoreFeed();
+
+// ── SCROLL: hide top-nav ───────────────────────────────────
+const topNav=document.getElementById('top-nav');
+window.addEventListener('scroll',()=>{
+  window.scrollY>70 ? topNav.classList.add('hidden') : topNav.classList.remove('hidden');
+},{passive:true});
+
+// ── STORE MODAL ────────────────────────────────────────────
+function openStoreModal(store){
+  const sp=shoePool.slice(0,6);
+  document.getElementById('modal-hd').innerHTML=`
+    <div class="m-logo"><img src="${store.img}" alt="${store.name}"></div>
+    <div class="m-info">
+      <h3>${store.name}</h3>
+      <p>⭐ 4.8 · ${store.tag} · Fast Delivery</p>
+      <p style="color:#16a34a;font-weight:800;font-size:.68rem;margin-top:2px">● Open Now</p>
+    </div>
+    <a href="shop-page.html" style="margin-left:auto;background:#1a1a1a;color:#fff;font-size:.72rem;font-weight:800;padding:8px 13px;border-radius:8px;text-decoration:none;white-space:nowrap">Visit Store →</a>
+    <button class="m-close" onclick="document.getElementById('store-modal').classList.remove('open')">✕</button>`;
+  document.getElementById('modal-grid').innerHTML=sp.map(p=>`
+    <div class="modal-p-card">
+      <img src="${p.img}" alt="shoe" loading="lazy">
+      <div class="mp">${p.price} TND</div>
+    </div>`).join('');
+  document.getElementById('store-modal').classList.add('open');
+}
+function closeStoreModal(e){
+  if(e.target===document.getElementById('store-modal'))
+    document.getElementById('store-modal').classList.remove('open');
+}
+</script>
+</body>
+</html>
