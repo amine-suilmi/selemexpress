@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SelemExpress – Your Shoe Universe</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/main.css">
+<link rel="stylesheet" href="styles/pages.css">
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div id="top-nav">
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="showPage('home',document.querySelector('.bot-nav a'))">Selem<span>Express</span></div>
+    <div class="nav-icons">
+      <a onclick="openNotifs()"><span class="ic">🔔</span><span>Notifs</span><div class="notif-dot" id="notif-dot"></div></a>
+      <a onclick="showPage('account',document.querySelectorAll('.bot-nav a')[4])"><span class="ic">👤</span><span>Account</span></a>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH BAR -->
+<div id="search-sticky">
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="Search stores…" oninput="handleSearch(this.value)" onkeydown="if(event.key==='Enter')handleSearch(this.value)">
+    <button onclick="handleSearch(document.getElementById('search-input').value)">🔍</button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="page-home" class="page" style="display:block;padding-bottom:0;">
+  <div class="sec"><div class="bar"></div>Shops You Know</div>
+  <div class="stores-scroll" id="stores-scroll"></div>
+  <div class="hero-slider" id="hero-slider"></div>
+  <div id="feed-wrapper"></div>
+  <div class="load-spinner" id="load-spinner">Loading more…</div>
+  <footer>
+    <div class="fl">Selem<span>Express</span></div>
+    <p>Tunisia's #1 online shoe marketplace.<br>Top brands · Fast delivery · Easy returns.</p>
+    <div class="links"><a href="#">About</a><a href="#">Sell With Us</a><a href="#">Help</a><a href="#">Returns</a><a href="#">Privacy</a></div>
+    <p style="margin-top:14px;font-size:.67rem;color:#3a3a3a">© 2026 SelemExpress. All rights reserved.</p>
+  </footer>
+</div>
+
+<!-- EXPLORE (SEARCH STORES) -->
+<div id="page-explore" class="page">
+  <div class="inner-hd">
+    <button class="back-btn" onclick="showPage('home',document.querySelector('.bot-nav a'))">←</button>
+    <h2>Find Stores</h2>
+  </div>
+  <div class="explore-wrap">
+    <div class="cat-chips" id="cat-chips"></div>
+    <div class="store-search-grid" id="store-search-grid"></div>
+  </div>
+</div>
+
+<!-- CART -->
+<div id="page-cart" class="page">
+  <div class="inner-hd">
+    <button class="back-btn" onclick="showPage('home',document.querySelector('.bot-nav a'))">←</button>
+    <h2>My Cart</h2>
+  </div>
+  <div class="cart-wrap" id="cart-wrap"></div>
+</div>
+
+<!-- SAVED -->
+<div id="page-saved" class="page">
+  <div class="inner-hd">
+    <button class="back-btn" onclick="showPage('home',document.querySelector('.bot-nav a'))">←</button>
+    <h2>Saved Items</h2>
+    <div class="inner-hd-right">
+      <button class="add-all-btn" style="width:auto;padding:7px 14px;margin:0;font-size:.75rem;" onclick="addAllToCart()">Add All to Cart 🛒</button>
+    </div>
+  </div>
+  <div class="saved-wrap" id="saved-wrap"></div>
+</div>
+
+<!-- OFFERS -->
+<div id="page-offers" class="page">
+  <div class="inner-hd">
+    <button class="back-btn" onclick="showPage('home',document.querySelector('.bot-nav a'))">←</button>
+    <h2>Explore</h2>
+  </div>
+  <div class="offers-page" id="offers-feed"></div>
+</div>
+
+<!-- ACCOUNT -->
+<div id="page-account" class="page">
+  <div class="inner-hd">
+    <button class="back-btn" onclick="showPage('home',document.querySelector('.bot-nav a'))">←</button>
+    <h2 id="account-hd-title">My Account</h2>
+  </div>
+  <div class="account-wrap">
+    <div class="auth-forms-wrap" id="auth-forms-wrap">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login',this)">Sign In</button>
+        <button class="auth-tab" onclick="switchAuthTab('register',this)">Create Account</button>
+      </div>
+      <!-- LOGIN -->
+      <div class="auth-form" id="form-login">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="login-email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" id="login-pw" placeholder="••••••••">
+        </div>
+        <button class="auth-btn" onclick="doLogin()">Sign In →</button>
+        <div class="auth-divider">or continue with</div>
+        <button class="social-btn" onclick="doSocialLogin('Google')">🌐 Continue with Google</button>
+        <button class="social-btn" onclick="doSocialLogin('Facebook')">📘 Continue with Facebook</button>
+      </div>
+      <!-- REGISTER -->
+      <div class="auth-form hidden" id="form-register">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" type="text" id="reg-name" placeholder="Your name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="reg-email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" id="reg-pw" placeholder="Min. 6 characters">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <input class="form-input" type="password" id="reg-pw2" placeholder="Repeat password">
+        </div>
+        <button class="auth-btn" onclick="doRegister()">Create Account →</button>
+        <div class="auth-divider">or continue with</div>
+        <button class="social-btn" onclick="doSocialLogin('Google')">🌐 Continue with Google</button>
+      </div>
+    </div>
+    <!-- PROFILE (shown when logged in) -->
+    <div class="profile-view" id="profile-view">
+      <div class="profile-card">
+        <div class="profile-av">👤</div>
+        <div>
+          <div class="profile-name" id="profile-name">—</div>
+          <div class="profile-email" id="profile-email">—</div>
+        </div>
+      </div>
+      <div class="profile-menu">
+        <div class="profile-menu-item" onclick="window._toast('Orders coming soon')"><span class="m-ic">📦</span>My Orders<span class="m-arr">›</span></div>
+        <div class="profile-menu-item" onclick="showPage('saved',document.querySelectorAll('.bot-nav a')[3])"><span class="m-ic">🤍</span>Saved Items<span class="m-arr">›</span></div>
+        <div class="profile-menu-item" onclick="openAddressModal('settings')"><span class="m-ic">📍</span>Delivery Addresses<span class="m-arr">›</span></div>
+        <div class="profile-menu-item" onclick="window._toast('Payment methods coming soon')"><span class="m-ic">💳</span>Payment Methods<span class="m-arr">›</span></div>
+        <div class="profile-menu-item" onclick="openAddressModal('settings')"><span class="m-ic">⚙️</span>Settings<span class="m-arr">›</span></div>
+        <div class="profile-menu-item" onclick="window._toast('Help center coming soon')"><span class="m-ic">❓</span>Help & Support<span class="m-arr">›</span></div>
+      </div>
+      <div class="ambassador-card">
+        <div class="ambassador-title">💼 Ambassador Program</div>
+        <div class="ambassador-copy">Share your special link and earn <strong>5%</strong> from every sale made through your ambassador link.</div>
+        <div class="ambassador-badge" id="ambassador-badge">Ambassador account required</div>
+        <button class="secondary-btn" id="ambassador-toggle-btn" onclick="toggleAmbassador()">Activate Ambassador Account</button>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bot-nav">
+  <a class="active" onclick="showPage('home',this)"><span class="ic">🏠</span>Home</a>
+  <a onclick="showPage('explore',this)"><span class="ic">🔍</span>Explore</a>
+  <a onclick="showPage('cart',this)"><span class="ic">🛒</span>Cart<div class="cart-badge" id="cart-badge">0</div></a>
+  <a onclick="showPage('saved',this)"><span class="ic">🤍</span>Saved</a>
+  <a onclick="showPage('offers',this)"><span class="ic">📰</span>Explore</a>
+</div>
+
+<!-- STORE MODAL -->
+<div class="modal-overlay" id="store-modal" onclick="closeStoreModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- PRODUCT DETAIL PANEL -->
+<div class="modal-overlay" id="prod-panel" onclick="closeProdPanel(event)">
+  <div class="modal-sheet">
+    <div id="prod-content"></div>
+  </div>
+</div>
+
+<!-- ADDRESS MODAL -->
+<div class="modal-overlay center-modal" id="address-modal" onclick="closeAddressModal(event)">
+  <div class="modal-sheet">
+    <div class="option-modal-body">
+      <div class="option-modal-title">Delivery Address</div>
+      <div class="option-modal-sub">Keep your saved address or change it here. The same address is available from Settings.</div>
+      <div class="address-current" id="address-current-box">No address saved yet.</div>
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <textarea class="form-input" id="address-input" rows="4" placeholder="Street, building, city, governorate, phone number"></textarea>
+      </div>
+      <div class="address-actions">
+        <button class="secondary-btn" onclick="useSavedAddress()">Keep Current</button>
+        <button class="option-save-btn" onclick="saveAddress()">Save Address</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CART EDIT MODAL -->
+<div class="modal-overlay center-modal" id="cart-edit-modal" onclick="closeCartEdit(event)">
+  <div class="modal-sheet">
+    <div class="option-modal-body" id="cart-edit-content"></div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS PANEL -->
+<div id="notif-panel" onclick="closeNotifsOutside(event)">
+  <div class="notif-sheet" id="notif-sheet">
+    <div class="notif-hd">
+      <h3>🔔 Notifications</h3>
+      <button class="notif-close" onclick="closeNotifs()">✕</button>
+    </div>
+    <div id="notif-list"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast-el"></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
