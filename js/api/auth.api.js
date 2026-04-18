@@ -1,6 +1,8 @@
 // ══ AUTH API ════════════════════════════════════════════
 import { supabase } from './supabase.js';
 
+const SITE_URL = 'https://amine-suilmi.github.io/selemexpress/';
+
 export async function signIn(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
@@ -10,7 +12,10 @@ export async function signIn(email, password) {
 export async function signUp(email, password, name) {
   const { data, error } = await supabase.auth.signUp({
     email, password,
-    options: { data: { full_name: name } }
+    options: {
+      data: { full_name: name },
+      emailRedirectTo: SITE_URL
+    }
   });
   if (error) throw error;
   return data.user;
@@ -24,7 +29,7 @@ export async function signOut() {
 export async function signInWithProvider(provider) {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: provider.toLowerCase(),
-    options: { redirectTo: location.origin + location.pathname }
+    options: { redirectTo: SITE_URL }
   });
   if (error) throw error;
 }
