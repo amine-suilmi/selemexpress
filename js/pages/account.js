@@ -109,7 +109,7 @@ export async function saveAddress() {
 export async function toggleAmbassador() {
   if (!loggedInUser) {
     toast('Please sign in first');
-    window.showPage('account', document.querySelectorAll('.bot-nav a')[4]);
+    window.showPage('account', null);
     return;
   }
   if (!loggedInUser.isAmbassador) {
@@ -127,8 +127,8 @@ export async function toggleAmbassador() {
 }
 
 export function getAmbassadorLink(storeId) {
-  if (!loggedInUser) { toast('Please sign in first'); window.showPage('account', document.querySelectorAll('.bot-nav a')[4]); return; }
-  if (!loggedInUser.isAmbassador) { toast('Ambassador account required'); window.showPage('account', document.querySelectorAll('.bot-nav a')[4]); return; }
+  if (!loggedInUser) { toast('Please sign in first'); window.showPage('account', null); return; }
+  if (!loggedInUser.isAmbassador) { toast('Ambassador account required'); window.showPage('account', null); return; }
   const store = window._stores?.find(s => s.id === storeId);
   const link  = `${location.origin}${location.pathname}?ref=${loggedInUser.ambassadorCode}&store=${storeId}`;
   if (navigator.share) navigator.share({ title: 'SelemExpress Ambassador Link', text: `Shop ${store?.name || 'this store'} with my special link`, url: link }).catch(() => {});

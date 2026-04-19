@@ -8,10 +8,9 @@ import { renderAccount } from './pages/account.js';
 
 export function showPage(page, btn) {
   document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-  if (btn) {
-    document.querySelectorAll('.bot-nav a').forEach(a => a.classList.remove('active'));
-    btn.classList.add('active');
-  }
+  // btn is null when navigating to pages without a bottom-nav button (e.g. account)
+  document.querySelectorAll('.bot-nav a').forEach(a => a.classList.remove('active'));
+  if (btn) btn.classList.add('active');
   setCurrentPage(page);
   const el = document.getElementById('page-' + page);
   if (el) el.style.display = 'block';
