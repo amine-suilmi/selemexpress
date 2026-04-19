@@ -65,18 +65,24 @@ export function initSlider() {
 export function initFeed() {
   const feedWrapper = document.getElementById('feed-wrapper');
   if (!feedWrapper) return;
-  let totalCards = 0, posterIdx = 0, feedLoading = false;
-  const CHUNK  = 18;
+
+  let offset = 0, posterIdx = 0, loading = false;
+  const CHUNK = 18;
+  // Price variation for visual diversity
   const priceJ = [0, -10, 10, -5, 15, -15, 5, -20, 20, 8, -8, 12];
 
   function getShoe(i) {
+    if (!shoePool.length) return null;
     const b = shoePool[i % shoePool.length];
-    return { ...b, price: b.price + priceJ[i % priceJ.length] };
+    // Apply a small price jitter for visual variety but keep it positive
+    const adjusted = Math.max(b.price + priceJ[i % priceJ.length], 10);
+    return { ...b, price: adjusted };
   }
 
   function makeFeedPoster(p) {
-    const store = stores.find(s => s.id === p.storeId) || stores.find(s => s.id === p.store_id);
-    if (!store) return document.createElement('div');
+    const storeId = p.storeId || p.store_id;
+    const store = stores.find(s => s.id === storeId);
+    if (!store) return null;
     const el = document.createElement('div');
     el.className = 'store-poster';
     el.innerHTML = `
@@ -98,31 +104,37 @@ export function initFeed() {
         <div class="poster-title">${p.title}</div>
         <div class="poster-sub">${p.sub}</div>
         <a class="poster-cta"
-          onclick="event.stopPropagation();window._openStoreModal(window._stores.find(s=>s.id===${store.id}))">
+          onclick="event.stopPropagation();window._openStoreModal(window._stores.find(s=>s.id===${storeId}))">
           ${p.cta} →
         </a>
       </div>`;
     return el;
   }
 
-  function loadMoreFeed() {
-    if (feedLoading || !shoePool.length) return;
-    feedLoading = true;
+  function loadMore() {
+    if (loading || !shoePool.length) return;
+    loading = true;
     document.getElementById('load-spinner').style.display = 'block';
     setTimeout(() => {
-      if (totalCards > 0 && posterPool.length) {
-        feedWrapper.appendChild(makeFeedPoster(posterPool[posterIdx % posterPool.length]));
+      // Insert a poster every chunk (except the first chunk)
+      if (offset > 0 && posterPool.length) {
+        const poster = makeFeedPoster(posterPool[posterIdx % posterPool.length]);
+        if (poster) feedWrapper.appendChild(poster);
         posterIdx++;
       }
+
       const chunk = document.createElement('div');
       chunk.className = 'feed-chunk';
+
       for (let i = 0; i < CHUNK; i++) {
-        const shoe = getShoe(totalCards + i);
+        const shoe = getShoe(offset + i);
+        if (!shoe) continue;
         const card = document.createElement('div');
         card.className = 'feed-card';
         const isSaved = savedItems.has(shoe.id);
         card.innerHTML = `
-          <img class="feed-img" src="${shoe.img}" alt="${shoe.name}" loading="lazy">
+          <img class="feed-img" src="${shoe.img}" alt="${shoe.name}" loading="lazy"
+            onerror="this.src='https://placehold.co/300x300?text=?'">
           <button class="fav-btn"
             onclick="event.stopPropagation();window._toggleSave(${shoe.id},this)">
             ${isSaved ? '❤️' : '🤍'}
@@ -131,18 +143,19 @@ export function initFeed() {
         card.addEventListener('click', () => window._openProductPanel(shoe));
         chunk.appendChild(card);
       }
+
       feedWrapper.appendChild(chunk);
-      totalCards += CHUNK;
-      feedLoading = false;
+      offset += CHUNK;
+      loading = false;
       document.getElementById('load-spinner').style.display = 'none';
     }, 280);
   }
 
   new IntersectionObserver(e => {
-    if (e[0].isIntersecting) loadMoreFeed();
+    if (e[0].isIntersecting) loadMore();
   }, { rootMargin: '240px' }).observe(document.getElementById('load-spinner'));
 
-  loadMoreFeed();
+  loadMore();
 }
 
 export function initScrollHideNav() {

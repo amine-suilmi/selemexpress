@@ -5,18 +5,22 @@ export async function fetchProducts() {
   const { data, error } = await supabase
     .from('products')
     .select('*, stores(name, tag, img)')
+    .eq('is_active', true)
+    .order('store_id')
     .order('id');
   if (error) throw error;
-  // Normalise to match the shape the UI expects
   return data.map(p => ({
-    id: p.id,
-    name: p.name,
-    price: Number(p.price),
-    storeId: p.store_id,
-    img: p.img,
+    id:        p.id,
+    name:      p.name,
+    price:     Number(p.price),
+    storeId:   p.store_id,
+    img:       p.img,
     storeName: p.stores?.name,
-    storeTag: p.stores?.tag,
-    storeImg: p.stores?.img,
+    storeTag:  p.stores?.tag,
+    storeImg:  p.stores?.img,
+    colors:    Array.isArray(p.colors) ? p.colors : [],
+    sizes:     Array.isArray(p.sizes)  ? p.sizes  : [],
+    photos:    (p.photos && typeof p.photos === 'object') ? p.photos : {},
   }));
 }
 

@@ -1,7 +1,7 @@
 // ══ EXPLORE PAGE ════════════════════════════════════════
 import { stores, storeOffers, storeProducts, categories,
          sizes, colorSwatches, followedStores, savedItems,
-         exploreCat, setExploreCat } from '../state.js';
+         shoePool, exploreCat, setExploreCat } from '../state.js';
 import { toast, fmtFollowers, starsHTML, escapeAttr, getProductGallery } from '../ui.js';
 import { addToCartFromPanel } from './cart.js';
 import { toggleSave } from './saved.js';
@@ -50,11 +50,12 @@ export function renderStoreSearchGrid(list) {
     const card = document.createElement('div');
     card.className = 'store-search-card';
     card.innerHTML = `
-      <div class="store-search-av"><img src="${store.img}" alt="${store.name}" loading="lazy"></div>
+      <div class="store-search-av"><img src="${store.img}" alt="${store.name}" loading="lazy"
+        onerror="this.src='https://placehold.co/56x56?text=?'"></div>
       <div class="store-search-info">
         <div class="store-search-name">${store.name}</div>
         <div class="store-search-meta">${store.tag} · ${fmtFollowers(store.followers)} followers</div>
-        <div class="store-search-stars">${starsHTML(store.rating)} (${store.rating}.0)</div>
+        <div class="store-search-stars">${starsHTML(store.rating)} (${Number(store.rating).toFixed(1)})</div>
       </div>
       <button class="store-search-follow ${isFollowed ? 'following' : ''}"
         onclick="event.stopPropagation();window._toggleFollow(${store.id},this)">
@@ -67,11 +68,21 @@ export function renderStoreSearchGrid(list) {
 
 export function openStoreModal(store) {
   const offer    = storeOffers[store.id];
-  const products = storeProducts[store.id] || [];
+  // Get thumbnails — prefer storeProducts map, fallback to shoePool products
+  let products = storeProducts[store.id] || [];
+  if (!products.length) {
+    // Fallback: find real products from shoePool for this store
+    products = shoePool
+      .filter(p => p.storeId === store.id)
+      .slice(0, 3)
+      .map(p => ({ price: p.price, img: p.img }));
+  }
   const isFollowed = followedStores.has(store.id);
+
   document.getElementById('modal-content').innerHTML = `
     <div class="sm-header">
-      <div class="sm-logo"><img src="${store.img}" alt="${store.name}"></div>
+      <div class="sm-logo"><img src="${store.img}" alt="${store.name}"
+        onerror="this.src='https://placehold.co/56x56?text=?'"></div>
       <div class="sm-info">
         <div class="sm-name">${store.name}</div>
         <div class="sm-meta">
@@ -79,7 +90,7 @@ export function openStoreModal(store) {
           <span>·</span><span>${store.tag}</span>
         </div>
         <div class="sm-stars" id="sm-stars-${store.id}">
-          ${[1,2,3,4,5].map(n => `<span class="star ${n <= store.rating ? 'lit' : ''}" data-val="${n}"
+          ${[1,2,3,4,5].map(n => `<span class="star ${n <= Number(store.rating) ? 'lit' : ''}" data-val="${n}"
             onmouseover="window._hoverStars(${store.id},${n})"
             onmouseout="window._unhoverStars(${store.id})"
             onclick="window._rateStore(${store.id},${n})">★</span>`).join('')}
@@ -94,23 +105,31 @@ export function openStoreModal(store) {
     </div>
     ${offer ? `
       <div class="sm-offer">
-        <img src="${offer.bg}" alt="offer" loading="lazy">
+        <img src="${offer.bg}" alt="offer" loading="lazy"
+          onerror="this.src='https://placehold.co/400x140?text=Offer'">
         <div class="sm-offer-overlay"></div>
         <div class="sm-offer-content">
-          <span class="sm-offer-badge">${offer.badge}</span>
-          <div class="sm-offer-title">${offer.title}</div>
-          <div class="sm-offer-sub">${offer.sub}</div>
+          <span class="sm-offer-badge">${offer.badge || ''}</span>
+          <div class="sm-offer-title">${offer.title || ''}</div>
+          <div class="sm-offer-sub">${offer.sub || ''}</div>
         </div>
       </div>` : ''}
     <div class="sm-products-label">This Week's Models</div>
     <div class="sm-products">
-      ${products.map((p, i) => `
-        <div class="sm-prod" onclick="
+      ${products.length ? products.map((p, i) => {
+        // Find the matching product in shoePool so we can open the detail panel
+        const realProd = shoePool.find(sp => sp.img === p.img && sp.storeId === store.id)
+          || shoePool.find(sp => sp.storeId === store.id);
+        const prodId   = realProd ? realProd.id : store.id * 100 + i;
+        const prodName = realProd ? realProd.name : (store.name + ' Model ' + (i + 1));
+        return `<div class="sm-prod" onclick="
           document.getElementById('store-modal').classList.remove('open');
-          window._openProductPanel({id:${store.id * 100 + i},name:'${store.name} Model ${i+1}',price:${p.price},storeId:${store.id},img:'${p.img}'})">
-          <img src="${p.img}" alt="shoe" loading="lazy">
-          <div class="sm-prod-price">${p.price} TND</div>
-        </div>`).join('')}
+          window._openProductPanel({id:${prodId},name:'${escapeAttr(prodName)}',price:${Number(p.price)},storeId:${store.id},img:'${p.img}'})">
+          <img src="${p.img}" alt="shoe" loading="lazy"
+            onerror="this.src='https://placehold.co/130x130?text=?'">
+          <div class="sm-prod-price">${Number(p.price)} TND</div>
+        </div>`;
+      }).join('') : `<div style="padding:20px;color:#999;font-size:.8rem;text-align:center;">No products yet</div>`}
     </div>`;
   document.getElementById('store-modal').classList.add('open');
 }
@@ -145,9 +164,24 @@ export function closeStoreModal(e) {
 }
 
 export function openProductPanel(shoe) {
-  const store  = stores.find(s => s.id === shoe.storeId) || stores[0];
+  // Try to find the full product with photos from shoePool
+  const fullProduct = shoePool.find(p => p.id === shoe.id) || shoe;
+  const store  = stores.find(s => s.id === (shoe.storeId || shoe.store_id)) || stores[0];
   const isSaved = savedItems.has(shoe.id);
-  const gallery = getProductGallery(shoe, storeProducts);
+
+  // Build gallery: owner photos first, then thumbnails from storeProducts
+  let gallery = [];
+  if (fullProduct.photos && typeof fullProduct.photos === 'object') {
+    const photoValues = Object.values(fullProduct.photos);
+    photoValues.forEach(arr => {
+      if (Array.isArray(arr)) arr.forEach(url => { if (url && !gallery.includes(url)) gallery.push(url); });
+    });
+  }
+  if (!gallery.length) {
+    gallery = getProductGallery(shoe, storeProducts);
+  }
+  if (!gallery.length) gallery = [shoe.img];
+
   document.getElementById('prod-content').innerHTML = `
     <div class="pd-gallery-wrap">
       <button class="pd-close-btn"
@@ -157,8 +191,9 @@ export function openProductPanel(shoe) {
         ${gallery.map((img, idx) => `
           <div class="pd-gallery-slide">
             <img class="pd-img" src="${img}"
-              alt="${shoe.name} photo ${idx+1}"
-              loading="${idx === 0 ? 'eager' : 'lazy'}">
+              alt="${shoe.name} photo ${idx + 1}"
+              loading="${idx === 0 ? 'eager' : 'lazy'}"
+              onerror="this.src='https://placehold.co/400x400?text=?'">
           </div>`).join('')}
       </div>
       ${gallery.length > 1 ? `
@@ -172,7 +207,8 @@ export function openProductPanel(shoe) {
       <div class="pd-store-row"
         onclick="document.getElementById('prod-panel').classList.remove('open');
                  window._openStoreModal(window._stores.find(s=>s.id===${store.id}))">
-        <div class="pd-store-av"><img src="${store.img}" alt="${store.name}"></div>
+        <div class="pd-store-av"><img src="${store.img}" alt="${store.name}"
+          onerror="this.src='https://placehold.co/28x28?text=?'"></div>
         <span class="pd-store-name">${store.name} · ${store.tag} ›</span>
       </div>
       <div class="pd-price">${shoe.price} TND</div>

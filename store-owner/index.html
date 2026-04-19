@@ -216,14 +216,14 @@ window.doRegister=async()=>{
   const userId=sd?.user?.id;
   if(!userId){loader(false);setErr('Registration failed. If you already registered, please sign in.');return;}
   // Call SECURITY DEFINER RPC to create store safely (bypasses RLS)
-  const{error:re}=await sb.rpc('register_store',{p_user_id:userId,p_store_name:sname,p_store_tag:stag});
+  const{data:rpcData,error:re}=await sb.rpc('register_store',{p_user_id:userId,p_store_name:sname,p_store_tag:stag});
   if(re){
     loader(false);
-    if(re.message?.includes('already owns'))setErr('You already have a store — please sign in.');
-    else setErr('Store creation failed: '+re.message);
+    setErr('Store creation failed: '+re.message);
     return;
   }
-  toast('Store created! Welcome 🎉',3000);
+  // rpcData = { store_id: X, created: true/false }
+  toast(rpcData?.created?'Store created! Welcome 🎉':'Store found — signing you in…',3000);
   // Session is live — onAuthStateChange fires now
 };
 
@@ -271,10 +271,20 @@ async function loadData(uid){
 }
 
 // ── AUTH STATE
+let _loading = false;  // guard against concurrent loads
 sb.auth.onAuthStateChange(async(event,session)=>{
   if(session?.user&&(event==='SIGNED_IN'||event==='INITIAL_SESSION')){
-    me=session.user;loader(true);await loadData(me.id);
-  } else if(event==='SIGNED_OUT'){showAuth();loader(false);}
+    if(_loading) return;          // already loading, skip
+    if(store && event==='INITIAL_SESSION') return; // already loaded
+    _loading=true;
+    me=session.user;loader(true);
+    await loadData(me.id);
+    _loading=false;
+  } else if(event==='SIGNED_OUT'||event==='USER_DELETED'){
+    _loading=false;store=null;showAuth();loader(false);
+  } else if(event==='TOKEN_REFRESHED'&&session?.user){
+    me=session.user; // keep me in sync after token refresh, no reload needed
+  }
 });
 (async()=>{const{data:{session}}=await sb.auth.getSession();if(!session){loader(false);showAuth();}})();
 
@@ -399,6 +409,8 @@ window.tS=(s,id)=>{const i=tSizes.indexOf(s);if(i>-1)tSizes.splice(i,1);else tSi
 
 window.upPho=async(ev,cn,idx,pid)=>{
   const file=ev.target.files[0];if(!file)return;toast('Uploading…');
+  // Refresh session to ensure token is valid before uploading
+  await sb.auth.getSession();
   const ext=file.name.split('.').pop(),path=`${store.id}/${Date.now()}-${cn}-${idx}.${ext}`;
   const{error:ue}=await sb.storage.from('product-photos').upload(path,file,{upsert:true});
   if(ue){toast('Upload failed: '+ue.message);return;}
@@ -479,7 +491,9 @@ window.saveOffer=async(id)=>{
   let bgUrl=id?offers.find(x=>x.id===id)?.bg||'':'';
   const fi=G('of-f');
   if(fi.files[0]){
-    toast('Uploading…');const file=fi.files[0],ext=file.name.split('.').pop(),path=`${store.id}/offer-${Date.now()}.${ext}`;
+    toast('Uploading…');
+    await sb.auth.getSession(); // refresh token
+    const file=fi.files[0],ext=file.name.split('.').pop(),path=`${store.id}/offer-${Date.now()}.${ext}`;
     const{error:ue}=await sb.storage.from('product-photos').upload(path,file,{upsert:true});
     if(ue){toast('Photo upload failed');return;}
     const{data:ud}=sb.storage.from('product-photos').getPublicUrl(path);bgUrl=ud.publicUrl;
@@ -523,6 +537,7 @@ function renderAccount(c){
 }
 window.upSPho=async(e)=>{
   const file=e.target.files[0];if(!file)return;toast('Uploading…');
+  await sb.auth.getSession(); // refresh token
   const ext=file.name.split('.').pop(),path=`stores/${store.id}/logo.${ext}`;
   const{error}=await sb.storage.from('product-photos').upload(path,file,{upsert:true});
   if(error){toast('Upload failed');return;}
