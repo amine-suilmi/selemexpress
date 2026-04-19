@@ -1,5 +1,5 @@
 // ══ CART PAGE ════════════════════════════════════════════
-import { cartItems, savedItems, savedAddress, addressModalSource,
+import { cartItems, savedAddress, addressModalSource,
          editingCartIndex, setAddressModalSource, setEditingCartIndex,
          loggedInUser } from '../state.js';
 import { toast, getColorName, updateCartBadge } from '../ui.js';
@@ -20,7 +20,8 @@ export function renderCart() {
   cartItems.forEach((item, idx) => {
     html += `
       <div class="cart-item">
-        <img class="cart-item-img" src="${item.img}" alt="${item.name}">
+        <img class="cart-item-img" src="${item.img}" alt="${item.name}"
+          onerror="this.src='https://placehold.co/72x72?text=?'">
         <div class="cart-item-info">
           <div class="cart-item-name">${item.name}</div>
           <div class="cart-item-meta-row">
@@ -51,12 +52,12 @@ export function renderCart() {
     <div class="cart-footer">
       <div class="cart-row"><span>Subtotal</span><span>${subtotal} TND</span></div>
       <div class="cart-row"><span>Delivery</span><span>${delivery} TND</span></div>
-      <div class="delivery-note">7 TND delivery is added for each different store in your cart.</div>
+      <div class="delivery-note">7 TND delivery per store in your cart.</div>
       <div class="cart-row total"><span>Total</span><span>${subtotal + delivery} TND</span></div>
       <button class="checkout-btn" onclick="window._checkout()">Checkout →</button>
-      <button class="secondary-btn" onclick="window._openAddressModal('cart')">Address</button>
+      <button class="secondary-btn" onclick="window._openAddressModal('cart')">📍 Address</button>
       <div class="address-note">
-        ${savedAddress ? `Deliver to: ${savedAddress}` : 'No address saved yet. Add one from the button above or from Settings.'}
+        ${savedAddress ? `Deliver to: ${savedAddress}` : 'No delivery address saved yet.'}
       </div>
     </div>`;
   wrap.innerHTML = html;
@@ -67,10 +68,7 @@ export function changeQty(idx, delta) {
   if (!item) return;
   item.qty += delta;
   if (item.qty <= 0) {
-    // remove from DB if logged in
-    if (loggedInUser && item.dbId) {
-      window._db?.deleteCartItem(item.dbId).catch(() => {});
-    }
+    if (loggedInUser && item.dbId) window._db?.deleteCartItem(item.dbId).catch(() => {});
     cartItems.splice(idx, 1);
   } else if (loggedInUser && item.productId) {
     window._db?.upsertCartItem(loggedInUser.id, item.productId, item.size, item.color, item.qty).catch(() => {});
@@ -82,21 +80,50 @@ export function changeQty(idx, delta) {
 export function removeCartItem(idx) {
   const item = cartItems[idx];
   if (!item) return;
-  if (loggedInUser && item.dbId) {
-    window._db?.deleteCartItem(item.dbId).catch(() => {});
-  }
+  if (loggedInUser && item.dbId) window._db?.deleteCartItem(item.dbId).catch(() => {});
   cartItems.splice(idx, 1);
   updateCartBadge(cartItems);
   renderCart();
 }
 
-export function checkout() {
+export async function checkout() {
+  if (!savedAddress) {
+    // Allow checkout but warn
+  }
+
+  // Create order rows in DB for each cart item (so store owners see them)
+  if (cartItems.length > 0) {
+    const orderRows = cartItems.map(item => ({
+      store_id:      item.storeId,
+      product_id:    item.productId || item.id,
+      product_name:  item.name,
+      size:          item.size,
+      color:         item.color,
+      qty:           item.qty,
+      price:         item.price * item.qty,
+      status:        'pending',
+      buyer_id:      loggedInUser?.id || null,
+      buyer_name:    loggedInUser?.name || 'Guest',
+      buyer_phone:   '',
+      buyer_address: savedAddress || '',
+    }));
+
+    try {
+      await window._db?.insertOrders(orderRows);
+    } catch (e) {
+      // Non-fatal — order creation failed but we still clear cart
+      console.error('Order creation failed:', e);
+    }
+  }
+
+  // Clear cart from DB
   if (loggedInUser) {
     window._db?.clearCart(loggedInUser.id).catch(() => {});
   }
+
   toast(savedAddress
     ? 'Order placed! 🎉 Delivery in 2-3 days'
-    : 'Order placed! 🎉 You can still add an address from cart settings');
+    : 'Order placed! 🎉 Add an address next time for delivery tracking.');
   cartItems.length = 0;
   updateCartBadge(cartItems);
   renderCart();

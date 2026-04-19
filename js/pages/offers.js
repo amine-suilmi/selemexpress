@@ -30,7 +30,7 @@ export function buildOffersPage() {
           ${isFollowed ? 'Following ✓' : 'Follow'}
         </button>
       </div>
-      <img class="op-img" src="${offer.bg}" alt="${offer.title}" loading="lazy"
+      <img class="op-img" src="${offer.bg || ''}" alt="${offer.title || ''}" loading="lazy"
         onclick="window._openStoreModal(window._stores.find(s=>s.id===${store.id}))">
       <div class="op-actions">
         <button class="op-action-btn like-btn">🤍</button>
@@ -43,9 +43,9 @@ export function buildOffersPage() {
       </div>
       <div class="op-likes like-label">${fmtFollowers(likes)} likes</div>
       <div class="op-caption">
-        <span class="op-badge">${offer.badge}</span><br>
+        <span class="op-badge">${offer.badge || ''}</span><br>
         <span class="store-bold">${store.name}</span>
-        <span> ${offer.title} — ${offer.sub}</span><br>
+        <span> ${offer.title || ''} ${offer.sub ? "— " + offer.sub : ''}</span><br>
         <span class="op-cta"
           onclick="window._openStoreModal(window._stores.find(s=>s.id===${store.id}))">
           Shop Now →

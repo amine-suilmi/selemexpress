@@ -63,3 +63,11 @@ export async function unsaveItem(userId, productId) {
     .eq('product_id', productId);
   if (error) throw error;
 }
+
+export async function insertOrders(orderRows) {
+  // Filter out rows without a valid store_id
+  const valid = orderRows.filter(r => r.store_id && r.product_id);
+  if (!valid.length) return;
+  const { error } = await supabase.from('orders').insert(valid);
+  if (error) throw error;
+}

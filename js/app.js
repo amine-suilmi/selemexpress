@@ -15,7 +15,7 @@ import { fetchProducts, fetchSlides, fetchPosters } from './api/products.api.js'
 import { signIn, signUp, signOut, signInWithProvider,
          getCurrentUser, getProfile, updateProfile, onAuthStateChange } from './api/auth.api.js';
 import { fetchCart, upsertCartItem, deleteCartItem, clearCart,
-         fetchSaved, saveItem, unsaveItem } from './api/cart.api.js';
+         fetchSaved, saveItem, unsaveItem, insertOrders } from './api/cart.api.js';
 
 import { renderStoresScroll, initSlider, initFeed, initScrollHideNav } from './pages/home.js';
 import { toggleFollow, handleSearch, openStoreModal, openProductPanel,
@@ -72,7 +72,7 @@ window._cartState          = () => ({ editingCartIndex });
 
 // DB API exposed for page modules
 window._db = { followStore, unfollowStore, submitRating,
-               upsertCartItem, deleteCartItem, clearCart,
+               upsertCartItem, deleteCartItem, clearCart, insertOrders,
                saveItem, unsaveItem, fetchSaved, fetchCart, updateProfile };
 
 // Functions called directly from HTML attributes
