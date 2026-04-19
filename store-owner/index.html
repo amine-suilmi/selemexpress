@@ -6,1049 +6,554 @@
 <title>SelemExpress Pro – Store Owner</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --bg:#fff; --text:#000; --card:#f8f8f8; --accent:#ffd700;
-  --green:#4caf50; --red:#f44336; --blue:#2196f3;
-  --gray:#666; --border:#eee; --speed:.3s;
-}
+:root{--bg:#fff;--text:#000;--card:#f8f8f8;--accent:#ffd700;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;--gray:#666;--border:#e5e5e5;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none;margin:0;padding:0;}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-
-/* ── HEADER ── */
-header{padding:14px 18px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;z-index:10;flex-shrink:0;}
-header h1{font-size:17px;font-weight:700;}
-.logo-accent{color:var(--accent);}
-.weekly-badge{font-size:10px;font-weight:600;background:var(--card);padding:4px 10px;border-radius:20px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:flex-end;gap:1px;}
-
-/* ── AUTH SCREEN ── */
-#auth-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:16px;}
-#auth-screen h2{font-size:22px;font-weight:700;text-align:center;}
-#auth-screen p{color:var(--gray);font-size:13px;text-align:center;}
-.auth-form{width:100%;max-width:380px;display:flex;flex-direction:column;gap:12px;}
-.auth-input{padding:14px;border-radius:12px;border:1px solid var(--border);font-family:inherit;font-size:14px;background:#f9f9f9;width:100%;}
-.auth-tabs{display:flex;gap:0;background:var(--card);border-radius:12px;padding:4px;width:100%;max-width:380px;}
-.auth-tab{flex:1;padding:9px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray);}
-.auth-tab.active{background:#fff;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.08);}
-
-/* ── MAIN ── */
-main{flex:1;overflow-y:auto;padding:16px;padding-bottom:90px;}
-
-/* ── BOTTOM NAV ── */
-nav.bot{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0;padding-bottom:calc(10px + env(safe-area-inset-bottom));z-index:100;}
-.nav-item{display:flex;flex-direction:column;align-items:center;color:var(--gray);font-size:11px;font-weight:600;cursor:pointer;flex:1;transition:color var(--speed);}
-.nav-item.active{color:var(--text);}
-.nav-icon{font-size:22px;margin-bottom:3px;}
-
-/* ── SUB-TABS ── */
-.sub-tabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
-.sub-tabs::-webkit-scrollbar{display:none;}
-.sub-tab{padding:8px 16px;border-radius:20px;background:var(--card);font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;border:1px solid transparent;}
-.sub-tab.active{background:var(--text);color:#fff;}
-
-/* ── CARDS ── */
-.card{background:var(--card);border-radius:16px;padding:16px;margin-bottom:14px;border:1px solid var(--border);}
-.order-card{display:flex;flex-direction:column;gap:12px;}
-.order-hd{display:flex;gap:12px;}
-.order-img{width:68px;height:68px;border-radius:12px;object-fit:cover;background:#eee;flex-shrink:0;}
-.order-info h3{font-size:15px;margin-bottom:4px;}
-.order-details{font-size:12px;color:var(--gray);line-height:1.5;}
-.customer-box{background:#fff;padding:12px;border-radius:12px;font-size:12px;border:1px solid var(--border);}
-.order-actions{display:flex;gap:8px;margin-top:4px;}
-
-/* ── BUTTONS ── */
-.btn{flex:1;padding:12px;border-radius:12px;border:none;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .2s;font-family:inherit;}
-.btn:active{opacity:.7;}
-.btn-confirm{background:var(--green);color:#fff;}
-.btn-reject{background:var(--red);color:#fff;}
-.btn-primary{background:var(--accent);color:#000;}
-.btn-outline{background:transparent;border:1px solid var(--border);}
-.btn-danger-ghost{background:transparent;border:1px solid var(--red);color:var(--red);}
-
-/* ── FAB ── */
-.fab{position:fixed;bottom:80px;right:18px;width:54px;height:54px;border-radius:27px;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.18);border:none;z-index:50;cursor:pointer;}
-.fab.hidden{display:none;}
-
-/* ── PRODUCTS ── */
-.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.product-card{background:var(--card);border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--border);cursor:pointer;}
-.product-img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
-.product-info{padding:10px;}
-.product-info h3{font-size:13px;margin-bottom:3px;}
-.product-price{font-weight:700;font-size:14px;}
-.stock-badge{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.92);padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;}
-
-/* ── OFFERS ── */
-.offer-card{background:var(--card);border-radius:16px;overflow:hidden;border:1px solid var(--border);margin-bottom:14px;}
-.offer-img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
-.offer-content{padding:12px;}
-.offer-actions-bar{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
-.offer-edit{font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;}
-.offer-del{font-size:12px;font-weight:700;color:var(--red);cursor:pointer;}
-
-/* ── ACCOUNT ── */
-.profile-hd{display:flex;flex-direction:column;align-items:center;padding:20px 0;}
-.profile-photo{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);margin-bottom:10px;}
-.profile-name{font-size:19px;font-weight:700;}
-.profile-tag{font-size:13px;color:var(--gray);margin-top:3px;}
-.acct-list{margin-top:18px;}
-.acct-item{display:flex;align-items:center;justify-content:space-between;padding:15px;background:var(--card);border-radius:12px;margin-bottom:9px;border:1px solid var(--border);cursor:pointer;}
-.acct-item-left{display:flex;align-items:center;gap:12px;}
-.acct-icon{font-size:19px;}
-.acct-label{font-weight:600;font-size:14px;}
-.acct-arrow{color:#ccc;font-size:18px;}
-
-/* ── MODAL ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:200;align-items:flex-end;}
-.modal-overlay.open{display:flex;}
-.modal-content{background:#fff;width:100%;border-radius:24px 24px 0 0;padding:24px;max-height:95vh;overflow-y:auto;animation:slideUp .28s ease-out;position:relative;}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-close{position:absolute;top:18px;right:18px;width:32px;height:32px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;cursor:pointer;}
-
-/* ── FORMS ── */
-.form-group{margin-bottom:18px;}
-.form-group label{display:block;margin-bottom:7px;font-weight:600;font-size:13px;}
-.form-input{width:100%;padding:13px;border-radius:12px;border:1px solid var(--border);font-family:inherit;font-size:14px;background:#f9f9f9;}
-.form-input:focus{border-color:var(--accent);background:#fff;}
-
-/* ── COLOR PICKER ── */
-.color-palette{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
-.color-circle{width:34px;height:34px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;position:relative;transition:transform .15s;}
-.color-circle.selected{border-color:#000;transform:scale(1.12);}
-.color-circle.selected::after{content:"✓";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-weight:700;font-size:12px;text-shadow:0 0 3px rgba(0,0,0,.5);}
-
-/* ── SIZE CHIPS ── */
-.size-selector{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px;}
-.size-chip{padding:8px 13px;border-radius:10px;border:1px solid var(--border);background:#f9f9f9;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
-.size-chip.selected{background:#000;color:#fff;border-color:#000;}
-
-/* ── STOCK MATRIX ── */
-.stock-wrap{overflow-x:auto;margin-top:10px;border:1px solid var(--border);border-radius:12px;}
-.stock-table{width:100%;border-collapse:collapse;font-size:12px;}
-.stock-table th,.stock-table td{border-bottom:1px solid var(--border);padding:10px;text-align:center;}
-.stock-table th{background:#f9f9f9;font-weight:600;}
-.stock-input{width:50px;padding:7px;text-align:center;border:1px solid #ddd;border-radius:6px;background:#fff;font-weight:700;font-size:13px;}
-.stock-input:focus{border-color:var(--accent);}
-
-/* ── PHOTO SECTION ── */
-.photo-section{margin-top:14px;padding:12px;background:#f9f9f9;border-radius:12px;}
-.photo-grid{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;margin-top:7px;}
-.photo-slot{flex:0 0 60px;height:60px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;border:1px dashed #ccc;overflow:hidden;cursor:pointer;position:relative;}
-.photo-slot img{width:100%;height:100%;object-fit:cover;}
-.photo-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
-
-/* ── EMPTY STATE ── */
-.empty{text-align:center;padding:56px 20px;color:#999;}
-.empty-icon{font-size:42px;margin-bottom:10px;}
-
-/* ── TOAST ── */
-.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(8px);background:#000;color:#fff;padding:9px 20px;border-radius:9px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:999;white-space:nowrap;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* ── LOADER ── */
-.loader{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--gray);font-size:13px;gap:8px;}
-.spin{width:18px;height:18px;border:2.5px solid #eee;border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
+#loader{position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .3s;}
+#loader.gone{opacity:0;pointer-events:none;}
+#loader h1{font-size:24px;font-weight:700;}
+.spin{width:32px;height:32px;border:3px solid #eee;border-top-color:#ffd700;border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── APP LOADER ── */
-#app-loader{position:fixed;inset:0;background:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
-#app-loader h1{font-size:22px;font-weight:700;}
-
+#auth{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;gap:14px;}
+#auth.hidden{display:none;}
+#auth h2{font-size:22px;font-weight:700;}
+#auth p{color:var(--gray);font-size:13px;text-align:center;}
+.atabs{display:flex;background:var(--card);border-radius:12px;padding:4px;width:100%;max-width:380px;}
+.atab{flex:1;padding:9px;border:none;background:transparent;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--gray);}
+.atab.on{background:#fff;color:#000;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.aform{width:100%;max-width:380px;display:flex;flex-direction:column;gap:10px;}
+.ai{padding:14px;border-radius:12px;border:1.5px solid var(--border);font-family:inherit;font-size:14px;background:#f9f9f9;width:100%;}
+.ai:focus{border-color:var(--accent);background:#fff;outline:none;}
+.aerr{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:11px 14px;border-radius:10px;font-size:13px;font-weight:600;display:none;}
+.aerr.on{display:block;}
+header{padding:13px 18px;background:#fff;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+header.hidden{display:none;}
+header h1{font-size:17px;font-weight:700;}
+.ly{color:#ffd700;}
+.wb{font-size:10px;font-weight:600;background:var(--card);padding:4px 10px;border-radius:20px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:flex-end;gap:1px;}
+main{flex:1;overflow-y:auto;padding:16px;padding-bottom:88px;}
+main.hidden{display:none;}
+.bot{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.bot.hidden{display:none;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 0 6px;font-size:11px;font-weight:600;color:var(--gray);cursor:pointer;}
+.ni.on{color:#000;}
+.nic{font-size:22px;margin-bottom:3px;}
+.fab{position:fixed;bottom:76px;right:18px;width:54px;height:54px;border-radius:27px;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,.18);border:none;z-index:50;cursor:pointer;}
+.fab.hidden{display:none;}
+.card{background:var(--card);border-radius:16px;padding:15px;margin-bottom:12px;border:1px solid var(--border);}
+.ocard{display:flex;flex-direction:column;gap:11px;}
+.ohd{display:flex;gap:12px;}
+.oimg{width:68px;height:68px;border-radius:12px;object-fit:cover;background:#eee;flex-shrink:0;}
+.oinfo h3{font-size:15px;margin-bottom:3px;}
+.odet{font-size:12px;color:var(--gray);line-height:1.5;}
+.cust{background:#fff;padding:11px;border-radius:12px;font-size:12px;border:1px solid var(--border);}
+.oact{display:flex;gap:8px;}
+.btn{flex:1;padding:12px;border-radius:12px;border:none;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;transition:opacity .15s;}
+.btn:active{opacity:.7;}
+.bok{background:var(--green);color:#fff;}
+.bno{background:var(--red);color:#fff;}
+.bpri{background:var(--accent);color:#000;}
+.bout{background:transparent;border:1.5px solid var(--border);}
+.bred{background:transparent;border:1.5px solid var(--red);color:var(--red);}
+.bful{width:100%!important;flex:none!important;}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.pcard{background:var(--card);border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--border);cursor:pointer;}
+.pimg{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
+.pinfo{padding:10px;}
+.pinfo h3{font-size:13px;margin-bottom:3px;}
+.ppri{font-weight:700;font-size:14px;}
+.sbg{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.92);padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;}
+.ofcard{background:var(--card);border-radius:16px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px;}
+.ofimg{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;}
+.ofbody{padding:12px;}
+.ofbar{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+.phd{display:flex;flex-direction:column;align-items:center;padding:18px 0;}
+.ppho{width:92px;height:92px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);margin-bottom:10px;cursor:pointer;}
+.pnm{font-size:19px;font-weight:700;}
+.ptg{font-size:13px;color:var(--gray);margin-top:3px;}
+.alist{margin-top:16px;}
+.aitem{display:flex;align-items:center;justify-content:space-between;padding:15px;background:var(--card);border-radius:12px;margin-bottom:9px;border:1px solid var(--border);cursor:pointer;}
+.aitem:active{background:#eee;}
+.aiL{display:flex;align-items:center;gap:12px;}
+.aic{font-size:19px;}
+.albl{font-weight:600;font-size:14px;}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:200;align-items:flex-end;}
+.modal.on{display:flex;}
+.msh{background:#fff;width:100%;border-radius:24px 24px 0 0;padding:24px;max-height:92vh;overflow-y:auto;animation:slideUp .28s ease-out;position:relative;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.mcl{position:absolute;top:18px;right:18px;width:32px;height:32px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;cursor:pointer;border:none;}
+.fg{margin-bottom:16px;}
+.fg label{display:block;margin-bottom:6px;font-weight:600;font-size:13px;}
+.fi{width:100%;padding:13px;border-radius:12px;border:1.5px solid var(--border);font-family:inherit;font-size:14px;background:#f9f9f9;}
+.fi:focus{border-color:var(--accent);background:#fff;outline:none;}
+textarea.fi{resize:vertical;}
+.cpal{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+.cc{width:34px;height:34px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;position:relative;transition:transform .15s;}
+.cc.on{border-color:#000;transform:scale(1.12);}
+.cc.on::after{content:"✓";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-weight:700;font-size:12px;text-shadow:0 0 3px rgba(0,0,0,.6);}
+.ssel{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px;}
+.sc{padding:7px 12px;border-radius:10px;border:1.5px solid var(--border);background:#f9f9f9;font-size:13px;font-weight:600;cursor:pointer;}
+.sc.on{background:#000;color:#fff;border-color:#000;}
+.smw{overflow-x:auto;margin-top:10px;border:1px solid var(--border);border-radius:12px;}
+.smt{width:100%;border-collapse:collapse;font-size:12px;}
+.smt th,.smt td{border-bottom:1px solid var(--border);padding:10px;text-align:center;}
+.smt th{background:#f9f9f9;font-weight:600;}
+.smi{width:52px;padding:7px;text-align:center;border:1.5px solid #ddd;border-radius:6px;background:#fff;font-weight:700;font-size:13px;font-family:inherit;}
+.smi:focus{border-color:var(--accent);outline:none;}
+.psec{margin-top:14px;padding:12px;background:#f9f9f9;border-radius:12px;}
+.pgr{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-top:7px;}
+.psl{flex:0 0 62px;height:62px;background:#e5e5e5;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;border:1.5px dashed #ccc;overflow:hidden;cursor:pointer;position:relative;}
+.psl img{width:100%;height:100%;object-fit:cover;}
+.psl input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.stabs{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+.stabs::-webkit-scrollbar{display:none;}
+.stab{padding:8px 16px;border-radius:20px;background:var(--card);font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;border:1.5px solid transparent;}
+.stab.on{background:#000;color:#fff;}
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%) translateY(8px);background:#111;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:999;white-space:nowrap;max-width:90vw;text-align:center;}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.empty{text-align:center;padding:52px 20px;color:#999;}
+.eic{font-size:42px;margin-bottom:10px;}
 .hidden{display:none!important;}
-.fade-in{animation:fadeIn .25s ease;}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
 
-<!-- App Loader -->
-<div id="app-loader">
-  <h1>Selem<span style="color:#ffd700">Express</span> Pro</h1>
-  <div class="spin" style="width:28px;height:28px;border-width:3px;border-color:#eee;border-top-color:#ffd700;"></div>
+<div id="loader"><h1>Selem<span style="color:#ffd700">Express</span> Pro</h1><div class="spin"></div></div>
+
+<div id="auth" class="hidden">
+  <h2>🏪 Store Owner Portal</h2>
+  <p>Manage your store, products and orders on SelemExpress</p>
+  <div class="atabs">
+    <button class="atab on"  id="tab-login"    onclick="swTab('login')">Sign In</button>
+    <button class="atab"     id="tab-register" onclick="swTab('register')">Register Store</button>
+  </div>
+  <div class="aerr" id="aerr"></div>
+  <div class="aform" id="form-login">
+    <input id="l-email" class="ai" type="email"    placeholder="Email" autocomplete="email">
+    <input id="l-pw"    class="ai" type="password" placeholder="Password" autocomplete="current-password">
+    <button class="btn bpri bful" style="padding:15px;border-radius:12px;" onclick="doLogin()">Sign In →</button>
+  </div>
+  <div class="aform hidden" id="form-register">
+    <input id="r-sname" class="ai" type="text"     placeholder="Store name (e.g. StepUp TN)">
+    <input id="r-stag"  class="ai" type="text"     placeholder="Category (e.g. Sneakers, Boots…)">
+    <input id="r-email" class="ai" type="email"    placeholder="Your email" autocomplete="email">
+    <input id="r-pw"    class="ai" type="password" placeholder="Password (min. 6 characters)" autocomplete="new-password">
+    <button class="btn bpri bful" style="padding:15px;border-radius:12px;" onclick="doRegister()">Create Store →</button>
+  </div>
 </div>
 
-<header>
-  <h1>Selem<span class="logo-accent">Express</span> Pro</h1>
-  <div id="weekly-badge" class="weekly-badge">
-    <span id="wk-products">Models: –/3</span>
-    <span id="wk-offers">Offers: –/1</span>
-  </div>
+<header id="hdr" class="hidden">
+  <h1>Selem<span class="ly">Express</span> Pro</h1>
+  <div class="wb"><span id="wkp">Models: –/3</span><span id="wko">Offers: –/1</span></div>
 </header>
 
-<!-- Auth Screen (shown when not logged in) -->
-<div id="auth-screen" class="hidden">
-  <h2>Store Owner Portal</h2>
-  <p>Sign in to manage your store on SelemExpress</p>
-  <div class="auth-tabs">
-    <button class="auth-tab active" onclick="setAuthTab('login',this)">Sign In</button>
-    <button class="auth-tab" onclick="setAuthTab('register',this)">Register Store</button>
-  </div>
-  <div class="auth-form" id="auth-form">
-    <!-- injected by JS -->
-  </div>
-</div>
-
-<!-- Main App (shown when logged in) -->
-<main id="app-main" class="hidden"></main>
-
+<main id="app" class="hidden"></main>
 <button id="fab" class="fab hidden" onclick="fabClick()">+</button>
 
-<nav class="bot hidden" id="bot-nav">
-  <div class="nav-item active" data-tab="orders" onclick="switchTab('orders',this)">
-    <span class="nav-icon">📦</span><span>Orders</span>
-  </div>
-  <div class="nav-item" data-tab="products" onclick="switchTab('products',this)">
-    <span class="nav-icon">👟</span><span>Products</span>
-  </div>
-  <div class="nav-item" data-tab="offers" onclick="switchTab('offers',this)">
-    <span class="nav-icon">🏷️</span><span>Offers</span>
-  </div>
-  <div class="nav-item" data-tab="account" onclick="switchTab('account',this)">
-    <span class="nav-icon">👤</span><span>Account</span>
-  </div>
+<nav class="bot hidden" id="botnav">
+  <div class="ni on" data-t="orders"   onclick="goTab('orders',this)">  <span class="nic">📦</span>Orders</div>
+  <div class="ni"    data-t="products" onclick="goTab('products',this)"><span class="nic">👟</span>Products</div>
+  <div class="ni"    data-t="offers"   onclick="goTab('offers',this)">  <span class="nic">🏷️</span>Offers</div>
+  <div class="ni"    data-t="account"  onclick="goTab('account',this)"> <span class="nic">👤</span>Account</div>
 </nav>
 
-<!-- Modal -->
-<div id="modal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal-content">
-    <div class="modal-close" onclick="closeModal()">✕</div>
-    <div id="modal-body"></div>
-  </div>
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()">
+  <div class="msh"><button class="mcl" onclick="closeModal()">✕</button><div id="mb"></div></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const sb = createClient('https://pbgwvszcynkueuaqffuo.supabase.co','sb_publishable_AIr0AQbE5ABJfkMGJjcV8w_674zAZQg');
 
-// ── SUPABASE ─────────────────────────────────────────────
-const supabase = createClient(
-  'https://pbgwvszcynkueuaqffuo.supabase.co',
-  'sb_publishable_AIr0AQbE5ABJfkMGJjcV8w_674zAZQg'
-);
+let me=null,store=null,products=[],offers=[],orders=[],tab='orders',orderSub='new';
+let weeklyStats={products_this_week:0,offers_this_week:0};
+let tColors=[],tSizes=[];
+const PLIM=3,OLIM=1;
+const CPAL=[{n:'Black',h:'#000'},{n:'White',h:'#FFF'},{n:'Red',h:'#F44336'},{n:'Blue',h:'#2196F3'},{n:'Green',h:'#4CAF50'},{n:'Yellow',h:'#FFEB3B'},{n:'Gray',h:'#9E9E9E'},{n:'Brown',h:'#795548'},{n:'Pink',h:'#E91E63'}];
+const SPAL=['36','37','38','39','40','41','42','43','44','45','46'];
+const G=id=>document.getElementById(id);
+const toast=(m,d=2500)=>{const e=G('toast');e.textContent=m;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),d);};
+const loader=(v)=>G('loader').classList.toggle('gone',!v);
+const setErr=(m)=>{const e=G('aerr');if(m){e.textContent=m;e.classList.add('on');}else e.classList.remove('on');};
+window.closeModal=()=>{G('modal').classList.remove('on');G('mb').innerHTML='';};
+const showModal=()=>G('modal').classList.add('on');
+const totalStock=p=>Object.values(p.stock||{}).reduce((a,s)=>a+Object.values(s).reduce((x,y)=>x+Number(y),0),0);
+const firstPhoto=p=>{const k=Object.keys(p.photos||{});return k.length&&(p.photos[k[0]]||[])[0]||'https://placehold.co/300?text=?';};
+const norm=p=>({...p,colors:Array.isArray(p.colors)?p.colors:[],sizes:Array.isArray(p.sizes)?p.sizes:[],stock:p.stock&&typeof p.stock==='object'?p.stock:{},photos:p.photos&&typeof p.photos==='object'?p.photos:{}});
 
-// ── STATE ────────────────────────────────────────────────
-let currentUser  = null;
-let ownerStore   = null;   // { id, name, tag, img, ... }
-let products     = [];
-let offers       = [];
-let orders       = [];
-let currentTab   = 'orders';
-let currentOrderSubTab = 'new';
-let weeklyStats  = { products_this_week: 0, offers_this_week: 0 };
-const PRODUCT_LIMIT = 3;
-const OFFER_LIMIT   = 1;
+// ── AUTH TABS
+window.swTab=t=>{
+  G('form-login').classList.toggle('hidden',t!=='login');
+  G('form-register').classList.toggle('hidden',t!=='register');
+  G('tab-login').classList.toggle('on',t==='login');
+  G('tab-register').classList.toggle('on',t==='register');
+  setErr('');
+};
 
-// temp form state
-let tempColors = [];
-let tempSizes  = [];
+// ── LOGIN
+window.doLogin=async()=>{
+  setErr('');
+  const email=G('l-email').value.trim(),pw=G('l-pw').value;
+  if(!email||!pw){setErr('Please fill in both fields.');return;}
+  loader(true);
+  const{error}=await sb.auth.signInWithPassword({email,password:pw});
+  if(error){loader(false);setErr(error.message==='Invalid login credentials'?'Wrong email or password.':error.message);return;}
+};
 
-const colorPalette = [
-  {name:'Black',hex:'#000000'},{name:'White',hex:'#FFFFFF'},
-  {name:'Red',hex:'#F44336'},{name:'Blue',hex:'#2196F3'},
-  {name:'Green',hex:'#4CAF50'},{name:'Yellow',hex:'#FFEB3B'},
-  {name:'Gray',hex:'#9E9E9E'},{name:'Brown',hex:'#795548'},
-  {name:'Pink',hex:'#E91E63'},
-];
-const sizePalette = ['36','37','38','39','40','41','42','43','44','45','46'];
-
-// ── HELPERS ──────────────────────────────────────────────
-function toast(msg, dur=2200) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), dur);
-}
-
-function showLoader() { document.getElementById('app-loader').style.display = 'flex'; }
-function hideLoader() { document.getElementById('app-loader').style.display = 'none'; }
-
-function showModal() { document.getElementById('modal').classList.add('open'); }
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-  document.getElementById('modal-body').innerHTML = '';
-}
-window.closeModal = closeModal;
-
-function totalStock(p) {
-  return Object.values(p.stock || {}).reduce((a, sizes) =>
-    a + Object.values(sizes).reduce((x, y) => x + Number(y), 0), 0);
-}
-
-function firstPhoto(p) {
-  const keys = Object.keys(p.photos || {});
-  if (!keys.length) return 'https://placehold.co/300x300?text=No+Photo';
-  return (p.photos[keys[0]] || [])[0] || 'https://placehold.co/300x300?text=No+Photo';
-}
-
-// ── AUTH ─────────────────────────────────────────────────
-function setAuthTab(tab, btn) {
-  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderAuthForm(tab);
-}
-window.setAuthTab = setAuthTab;
-
-function renderAuthForm(tab) {
-  const f = document.getElementById('auth-form');
-  if (tab === 'login') {
-    f.innerHTML = `
-      <input id="a-email" class="auth-input" type="email" placeholder="Email">
-      <input id="a-pw"    class="auth-input" type="password" placeholder="Password">
-      <button class="btn btn-primary" style="width:100%;" onclick="doLogin()">Sign In →</button>`;
-  } else {
-    f.innerHTML = `
-      <input id="a-sname" class="auth-input" type="text" placeholder="Store name (e.g. StepUp TN)">
-      <input id="a-stag"  class="auth-input" type="text" placeholder="Category (e.g. Sneakers)">
-      <input id="a-email" class="auth-input" type="email" placeholder="Email">
-      <input id="a-pw"    class="auth-input" type="password" placeholder="Password (min 6 chars)">
-      <button class="btn btn-primary" style="width:100%;" onclick="doRegister()">Create Store →</button>`;
-  }
-}
-
-async function doLogin() {
-  const email = document.getElementById('a-email').value.trim();
-  const pw    = document.getElementById('a-pw').value;
-  if (!email || !pw) { toast('Fill in all fields'); return; }
-  showLoader();
-  try {
-    const { error } = await supabase.auth.signInWithPassword({ email, password: pw });
-    if (error) throw error;
-    // onAuthStateChange handles the rest
-  } catch(e) { hideLoader(); toast('Sign-in failed: ' + e.message); }
-}
-window.doLogin = doLogin;
-
-async function doRegister() {
-  const storeName = document.getElementById('a-sname').value.trim();
-  const storeTag  = document.getElementById('a-stag').value.trim();
-  const email     = document.getElementById('a-email').value.trim();
-  const pw        = document.getElementById('a-pw').value;
-  if (!storeName || !storeTag || !email || !pw) { toast('Fill in all fields'); return; }
-  if (pw.length < 6) { toast('Password too short'); return; }
-  showLoader();
-  try {
-    // 1. Create auth user
-    const { data, error } = await supabase.auth.signUp({ email, password: pw,
-      options: { data: { full_name: storeName } }
-    });
-    if (error) throw error;
-    const userId = data.user?.id;
-    if (!userId) throw new Error('No user returned');
-
-    // 2. Create store record
-    const { data: storeData, error: storeErr } = await supabase
-      .from('stores')
-      .insert({ name: storeName, tag: storeTag,
-        img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&q=70' })
-      .select().single();
-    if (storeErr) throw storeErr;
-
-    // 3. Link owner
-    const { error: ownerErr } = await supabase
-      .from('store_owners')
-      .insert({ user_id: userId, store_id: storeData.id });
-    if (ownerErr) throw ownerErr;
-
-    toast('Store created! Check your email to confirm ✉️');
-    hideLoader();
-  } catch(e) { hideLoader(); toast('Registration failed: ' + e.message); }
-}
-window.doRegister = doRegister;
-
-async function doLogout() {
-  await supabase.auth.signOut();
-  currentUser  = null;
-  ownerStore   = null;
-  products = []; offers = []; orders = [];
-  showAuthScreen();
-}
-window.doLogout = doLogout;
-
-// ── BOOT / AUTH STATE ────────────────────────────────────
-supabase.auth.onAuthStateChange(async (_event, session) => {
-  if (session?.user) {
-    currentUser = session.user;
-    await loadOwnerData();
-  } else {
-    hideLoader();
-    showAuthScreen();
-  }
-});
-
-async function loadOwnerData() {
-  showLoader();
-  try {
-    // Load store owned by this user
-    const { data: ownerRow, error: ownerErr } = await supabase
-      .from('store_owners')
-      .select('store_id, stores(*)')
-      .eq('user_id', currentUser.id)
-      .single();
-
-    if (ownerErr || !ownerRow) {
-      // Logged in but no store linked – show register tab
-      hideLoader();
-      showAuthScreen('register');
-      toast('No store linked. Please register your store.');
-      return;
-    }
-
-    ownerStore = ownerRow.stores;
-
-    // Parallel load
-    const [prodsRes, offersRes, ordersRes, statsRes] = await Promise.all([
-      supabase.from('products').select('*').eq('store_id', ownerStore.id).eq('is_active', true).order('created_at', {ascending:false}),
-      supabase.from('store_offers').select('*').eq('store_id', ownerStore.id).order('created_at', {ascending:false}),
-      supabase.from('orders').select('*').eq('store_id', ownerStore.id).order('created_at', {ascending:false}),
-      supabase.from('store_weekly_stats').select('*').eq('store_id', ownerStore.id).single(),
-    ]);
-
-    products    = (prodsRes.data   || []).map(normalizeProduct);
-    offers      = offersRes.data   || [];
-    orders      = ordersRes.data   || [];
-    weeklyStats = statsRes.data    || { products_this_week: 0, offers_this_week: 0 };
-
-    showAppScreen();
-    switchTab('orders');
-  } catch(e) {
-    hideLoader();
-    toast('Error loading data: ' + e.message);
-  }
-}
-
-function normalizeProduct(p) {
-  // Ensure JSON fields are proper objects/arrays
-  return {
-    ...p,
-    colors: Array.isArray(p.colors) ? p.colors : [],
-    sizes:  Array.isArray(p.sizes)  ? p.sizes  : [],
-    stock:  (typeof p.stock === 'object' && p.stock) ? p.stock : {},
-    photos: (typeof p.photos === 'object' && p.photos) ? p.photos : {},
-  };
-}
-
-// ── SCREENS ──────────────────────────────────────────────
-function showAuthScreen(tab='login') {
-  document.getElementById('auth-screen').classList.remove('hidden');
-  document.getElementById('app-main').classList.add('hidden');
-  document.getElementById('bot-nav').classList.add('hidden');
-  document.getElementById('fab').classList.add('hidden');
-  renderAuthForm(tab);
-  const tabs = document.querySelectorAll('.auth-tab');
-  tabs[0].classList.toggle('active', tab === 'login');
-  tabs[1].classList.toggle('active', tab === 'register');
-}
-
-function showAppScreen() {
-  hideLoader();
-  document.getElementById('auth-screen').classList.add('hidden');
-  document.getElementById('app-main').classList.remove('hidden');
-  document.getElementById('bot-nav').classList.remove('hidden');
-}
-
-// ── TAB SWITCHING ─────────────────────────────────────────
-function switchTab(tab, btn) {
-  currentTab = tab;
-  document.querySelectorAll('.nav-item').forEach(el =>
-    el.classList.toggle('active', el.dataset.tab === tab));
-  const fab = document.getElementById('fab');
-  if (tab === 'products' || tab === 'offers') {
-    fab.classList.remove('hidden');
-  } else {
-    fab.classList.add('hidden');
-  }
-  render();
-}
-window.switchTab = switchTab;
-
-function fabClick() {
-  if (currentTab === 'products') openProductForm();
-  else if (currentTab === 'offers') openOfferForm();
-}
-window.fabClick = fabClick;
-
-// ── UPDATE WEEKLY BADGE ──────────────────────────────────
-function updateBadge() {
-  document.getElementById('wk-products').textContent =
-    `Models: ${weeklyStats.products_this_week}/${PRODUCT_LIMIT}`;
-  document.getElementById('wk-offers').textContent =
-    `Offers: ${weeklyStats.offers_this_week}/${OFFER_LIMIT}`;
-}
-
-// ── RENDER ───────────────────────────────────────────────
-function render() {
-  const c = document.getElementById('app-main');
-  c.className = 'fade-in';
-  updateBadge();
-  if (currentTab === 'orders')   renderOrders(c);
-  else if (currentTab === 'products') renderProducts(c);
-  else if (currentTab === 'offers')   renderOffers(c);
-  else if (currentTab === 'account')  renderAccount(c);
-}
-
-// ══ ORDERS ══════════════════════════════════════════════
-function renderOrders(c) {
-  const newOrders    = orders.filter(o => o.status === 'pending');
-  const inTransit    = orders.filter(o => ['waiting_delivery','on_the_way'].includes(o.status));
-  const history      = orders.filter(o => ['delivered','refused'].includes(o.status));
-
-  c.innerHTML = `
-    <div class="sub-tabs">
-      <div class="sub-tab ${currentOrderSubTab==='new'?'active':''}"
-        onclick="setOrderSub('new')">New (${newOrders.length})</div>
-      <div class="sub-tab ${currentOrderSubTab==='delivery'?'active':''}"
-        onclick="setOrderSub('delivery')">In Transit (${inTransit.length})</div>
-      <div class="sub-tab ${currentOrderSubTab==='history'?'active':''}"
-        onclick="setOrderSub('history')">History (${history.length})</div>
-    </div>`;
-
-  let filtered = currentOrderSubTab === 'new' ? newOrders
-    : currentOrderSubTab === 'delivery' ? inTransit : history;
-
-  if (!filtered.length) {
-    c.innerHTML += `<div class="empty"><div class="empty-icon">📦</div>No orders here</div>`;
+// ── REGISTER
+window.doRegister=async()=>{
+  setErr('');
+  const sname=G('r-sname').value.trim(),stag=G('r-stag').value.trim(),
+        email=G('r-email').value.trim(),pw=G('r-pw').value;
+  if(!sname||!stag||!email||!pw){setErr('Please fill in all fields.');return;}
+  if(pw.length<6){setErr('Password must be at least 6 characters.');return;}
+  loader(true);
+  // Sign up first
+  const{data:sd,error:se}=await sb.auth.signUp({email,password:pw,options:{data:{full_name:sname}}});
+  if(se){loader(false);setErr(se.message);return;}
+  const userId=sd?.user?.id;
+  if(!userId){loader(false);setErr('Registration failed. If you already registered, please sign in.');return;}
+  // Call SECURITY DEFINER RPC to create store safely (bypasses RLS)
+  const{error:re}=await sb.rpc('register_store',{p_user_id:userId,p_store_name:sname,p_store_tag:stag});
+  if(re){
+    loader(false);
+    if(re.message?.includes('already owns'))setErr('You already have a store — please sign in.');
+    else setErr('Store creation failed: '+re.message);
     return;
   }
+  toast('Store created! Welcome 🎉',3000);
+  // Session is live — onAuthStateChange fires now
+};
 
-  filtered.forEach(order => {
-    const prod = products.find(p => p.id === order.product_id);
-    const img  = prod ? firstPhoto(prod) : 'https://placehold.co/70x70?text=?';
-    c.innerHTML += `
-      <div class="card order-card">
-        <div class="order-hd">
-          <img src="${img}" class="order-img">
-          <div class="order-info">
-            <h3>${order.product_name}</h3>
-            <div class="order-details">Size: ${order.size} · Color: ${order.color} · Qty: ${order.qty}</div>
-            <div class="order-details" style="font-weight:700;color:#000;">${order.id}</div>
-            <div class="order-details" style="font-weight:700;color:var(--accent);">${order.price} TND</div>
-          </div>
-        </div>
-        <div class="customer-box">
-          <div style="font-weight:700;margin-bottom:4px;">${order.buyer_name || 'Customer'}</div>
-          <div style="color:var(--gray);">📞 ${order.buyer_phone || '–'}</div>
-          <div style="color:var(--gray);">📍 ${order.buyer_address || '–'}</div>
-        </div>
-        <div class="order-actions">${orderButtons(order)}</div>
-      </div>`;
+// ── LOGOUT
+window.doLogout=async()=>{
+  if(!confirm('Sign out?'))return;
+  loader(true);await sb.auth.signOut();
+  me=null;store=null;products=[];offers=[];orders=[];
+  showAuth();loader(false);
+};
+
+// ── SCREENS
+function showAuth(){
+  G('auth').classList.remove('hidden');
+  G('hdr').classList.add('hidden');
+  G('app').classList.add('hidden');
+  G('botnav').classList.add('hidden');
+  G('fab').classList.add('hidden');
+  setErr('');
+}
+function showApp(){
+  loader(false);
+  G('auth').classList.add('hidden');
+  G('hdr').classList.remove('hidden');
+  G('app').classList.remove('hidden');
+  G('botnav').classList.remove('hidden');
+}
+
+// ── LOAD DATA
+async function loadData(uid){
+  const{data:row,error:err}=await sb.from('store_owners').select('store_id,stores(*)').eq('user_id',uid).single();
+  if(err||!row){loader(false);showAuth();setErr('No store linked. Please register your store.');return;}
+  store=row.stores;
+  const[pR,oR,ordR,stR]=await Promise.all([
+    sb.from('products').select('*').eq('store_id',store.id).eq('is_active',true).order('created_at',{ascending:false}),
+    sb.from('store_offers').select('*').eq('store_id',store.id).order('created_at',{ascending:false}),
+    sb.from('orders').select('*').eq('store_id',store.id).order('created_at',{ascending:false}),
+    sb.from('store_weekly_stats').select('*').eq('store_id',store.id).single(),
+  ]);
+  products=(pR.data||[]).map(norm);offers=oR.data||[];orders=ordR.data||[];
+  weeklyStats=stR.data||{products_this_week:0,offers_this_week:0};
+  showApp();
+  goTab('orders',document.querySelector('.ni[data-t="orders"]'));
+  subOrders();
+}
+
+// ── AUTH STATE
+sb.auth.onAuthStateChange(async(event,session)=>{
+  if(session?.user&&(event==='SIGNED_IN'||event==='INITIAL_SESSION')){
+    me=session.user;loader(true);await loadData(me.id);
+  } else if(event==='SIGNED_OUT'){showAuth();loader(false);}
+});
+(async()=>{const{data:{session}}=await sb.auth.getSession();if(!session){loader(false);showAuth();}})();
+
+// ── TAB
+window.goTab=function(t,btn){
+  tab=t;
+  document.querySelectorAll('.ni').forEach(e=>e.classList.toggle('on',e.dataset.t===t));
+  G('fab').classList.toggle('hidden',t!=='products'&&t!=='offers');
+  render();
+};
+window.fabClick=()=>{if(tab==='products')openProdForm();else if(tab==='offers')openOfferForm();};
+
+function updBadge(){G('wkp').textContent='Models: '+weeklyStats.products_this_week+'/'+PLIM;G('wko').textContent='Offers: '+weeklyStats.offers_this_week+'/'+OLIM;}
+
+function render(){
+  G('app').className='';
+  updBadge();
+  if(tab==='orders')renderOrders(G('app'));
+  else if(tab==='products')renderProducts(G('app'));
+  else if(tab==='offers')renderOffers(G('app'));
+  else if(tab==='account')renderAccount(G('app'));
+}
+
+// ══ ORDERS
+function renderOrders(c){
+  const nO=orders.filter(o=>o.status==='pending');
+  const iT=orders.filter(o=>['waiting_delivery','on_the_way'].includes(o.status));
+  const hO=orders.filter(o=>['delivered','refused'].includes(o.status));
+  const list=orderSub==='new'?nO:orderSub==='delivery'?iT:hO;
+  c.innerHTML=`<div class="stabs">
+    <div class="stab ${orderSub==='new'?'on':''}"      onclick="oSub('new')">New (${nO.length})</div>
+    <div class="stab ${orderSub==='delivery'?'on':''}" onclick="oSub('delivery')">In Transit (${iT.length})</div>
+    <div class="stab ${orderSub==='history'?'on':''}"  onclick="oSub('history')">History (${hO.length})</div>
+  </div>${!list.length?'<div class="empty"><div class="eic">📦</div>No orders here</div>':''}`;
+  list.forEach(o=>{
+    const p=products.find(x=>x.id===o.product_id);
+    const img=p?firstPhoto(p):'https://placehold.co/70?text=?';
+    c.innerHTML+=`<div class="card ocard">
+      <div class="ohd"><img src="${img}" class="oimg" onerror="this.src='https://placehold.co/70?text=?'">
+        <div class="oinfo"><h3>${o.product_name}</h3>
+          <div class="odet">Size: ${o.size} · Color: ${o.color} · Qty: ${o.qty}</div>
+          <div class="odet" style="font-weight:700;color:#000;">${o.id}</div>
+          <div class="odet" style="font-weight:700;color:#d97706;">${o.price} TND</div>
+        </div></div>
+      <div class="cust"><div style="font-weight:700;margin-bottom:4px;">${o.buyer_name||'Customer'}</div>
+        <div style="color:var(--gray);">📞 ${o.buyer_phone||'–'}</div>
+        <div style="color:var(--gray);margin-top:2px;">📍 ${o.buyer_address||'–'}</div></div>
+      <div class="oact">${oBtns(o)}</div></div>`;
   });
 }
-window.setOrderSub = (sub) => { currentOrderSubTab = sub; render(); };
+window.oSub=s=>{orderSub=s;render();};
+function oBtns(o){
+  if(o.status==='pending')return`<button class="btn bok" onclick="updOrd('${o.id}','waiting_delivery')">✅ Confirm</button><button class="btn bno" onclick="updOrd('${o.id}','refused')">❌ Reject</button>`;
+  if(o.status==='waiting_delivery'||o.status==='on_the_way'){
+    const l=o.status==='waiting_delivery'?'⏳ Awaiting Pickup':'🚚 On the Way';
+    const c2=o.status==='waiting_delivery'?'var(--blue)':'#d97706';
+    return`<div style="font-weight:700;font-size:12px;color:${c2};width:100%;text-align:center;padding:12px;background:#fff;border-radius:12px;border:1px solid var(--border);">${l}</div>`;
+  }
+  const l=o.status==='delivered'?'✅ Delivered':'❌ Refused';
+  const c2=o.status==='delivered'?'var(--green)':'var(--red)';
+  return`<div style="font-weight:700;font-size:12px;color:${c2};width:100%;text-align:center;padding:12px;background:#fff;border-radius:12px;border:1px solid var(--border);">${l}</div>`;
+}
+window.updOrd=async(id,status)=>{
+  const{error}=await sb.from('orders').update({status}).eq('id',id);
+  if(error){toast('Update failed');return;}
+  const o=orders.find(x=>x.id===id);if(o)o.status=status;
+  if(status==='waiting_delivery')setTimeout(async()=>{await sb.from('orders').update({status:'on_the_way'}).eq('id',id);const o2=orders.find(x=>x.id===id);if(o2)o2.status='on_the_way';if(tab==='orders')render();},5000);
+  toast(status==='refused'?'Order rejected':'Order confirmed ✅');render();
+};
 
-function orderButtons(order) {
-  if (order.status === 'pending') {
-    return `<button class="btn btn-confirm" onclick="updateOrder('${order.id}','waiting_delivery')">✅ Confirm</button>
-            <button class="btn btn-reject"  onclick="updateOrder('${order.id}','refused')">❌ Reject</button>`;
-  }
-  if (order.status === 'waiting_delivery' || order.status === 'on_the_way') {
-    const txt   = order.status === 'waiting_delivery' ? '⏳ Waiting for Pickup' : '🚚 On the Way';
-    const color = order.status === 'waiting_delivery' ? 'var(--blue)' : 'var(--accent)';
-    return `<div style="font-weight:700;font-size:12px;color:${color};width:100%;text-align:center;
-      padding:12px;background:#fff;border-radius:12px;border:1px solid var(--border);">${txt}</div>`;
-  }
-  const color = order.status === 'delivered' ? 'var(--green)' : 'var(--red)';
-  const txt   = order.status === 'delivered' ? '✅ Delivered' : '❌ Refused';
-  return `<div style="font-weight:700;font-size:12px;color:${color};width:100%;text-align:center;
-    padding:12px;background:#fff;border-radius:12px;border:1px solid var(--border);">${txt}</div>`;
+// ══ PRODUCTS
+function renderProducts(c){
+  if(!products.length){c.innerHTML='<div class="empty"><div class="eic">👟</div>No products yet.<br>Tap + to add your first model.</div>';return;}
+  c.innerHTML='<div class="pgrid">'+products.map(p=>`<div class="pcard" onclick="openProdForm(${p.id})">
+    <div class="sbg">Stock: ${totalStock(p)}</div>
+    <img src="${firstPhoto(p)}" class="pimg" onerror="this.src='https://placehold.co/300?text=?'">
+    <div class="pinfo"><h3>${p.name}</h3><div class="ppri">${p.price} TND</div></div>
+  </div>`).join('')+'</div>';
 }
 
-window.updateOrder = async (id, status) => {
-  const { error } = await supabase.from('orders').update({ status }).eq('id', id);
-  if (error) { toast('Update failed'); return; }
-  const o = orders.find(x => x.id === id);
-  if (o) o.status = status;
-
-  // Auto-advance to on_the_way after 5s
-  if (status === 'waiting_delivery') {
-    setTimeout(async () => {
-      await supabase.from('orders').update({ status: 'on_the_way' }).eq('id', id);
-      const o2 = orders.find(x => x.id === id);
-      if (o2) o2.status = 'on_the_way';
-      if (currentTab === 'orders') render();
-    }, 5000);
-  }
-  toast(status === 'refused' ? 'Order rejected' : 'Order confirmed ✅');
-  render();
+window.openProdForm=function(id=null){
+  if(!id&&weeklyStats.products_this_week>=PLIM){toast('Weekly limit reached (3 models/week)');return;}
+  const p=id?products.find(x=>x.id===id):{name:'',price:'',colors:[],sizes:[],stock:{},photos:{}};
+  if(!p)return;
+  tColors=id?[...p.colors]:[];tSizes=id?[...p.sizes]:[];
+  showModal();renderPF(id,p);
 };
 
-// ══ PRODUCTS ════════════════════════════════════════════
-function renderProducts(c) {
-  if (!products.length) {
-    c.innerHTML = `<div class="empty"><div class="empty-icon">👟</div>No products yet. Tap + to add your first model.</div>`;
-    return;
-  }
-  c.innerHTML = `<div class="product-grid">
-    ${products.map(p => `
-      <div class="product-card" onclick="openProductForm(${p.id})">
-        <div class="stock-badge">Stock: ${totalStock(p)}</div>
-        <img src="${firstPhoto(p)}" class="product-img">
-        <div class="product-info">
-          <h3>${p.name}</h3>
-          <div class="product-price">${p.price} TND</div>
-        </div>
-      </div>`).join('')}
-  </div>`;
+function renderPF(id,p){
+  G('mb').innerHTML=`
+    <h2 style="font-size:18px;margin-bottom:20px;">${id?'Edit Model':'Add New Model'}</h2>
+    <div class="fg"><label>Model Name</label><input class="fi" id="fn" value="${p.name||''}" placeholder="e.g. Air Max 2026"></div>
+    <div class="fg"><label>Price (TND)</label><input class="fi" type="number" id="fp" value="${p.price||''}" placeholder="120"></div>
+    <div class="fg"><label>Colors</label><div class="cpal">${CPAL.map(c=>`
+      <div class="cc ${tColors.some(tc=>tc.n===c.n)?'on':''}"
+        style="background:${c.h};${c.h==='#FFF'?'border:2px solid #ddd;':''}"
+        onclick="tC('${c.n}','${c.h}',${id||'null'})"></div>`).join('')}</div></div>
+    <div class="fg"><label>Sizes (EU)</label><div class="ssel">${SPAL.map(s=>`
+      <div class="sc ${tSizes.includes(s)?'on':''}" onclick="tS('${s}',${id||'null'})">${s}</div>`).join('')}</div></div>
+    <div id="ss" class="${tColors.length&&tSizes.length?'':'hidden'}">
+      <div class="fg"><label>Stock per Color × Size</label>
+        <div class="smw"><table class="smt">
+          <thead><tr><th>Color</th>${tSizes.map(s=>`<th>${s}</th>`).join('')}</tr></thead>
+          <tbody>${tColors.map(c=>`<tr><td style="font-weight:700;">${c.n}</td>${tSizes.map(s=>`<td><input type="number" class="smi" id="st-${c.n}-${s}" value="${(p.stock[c.n]||{})[s]||0}" min="0"></td>`).join('')}</tr>`).join('')}</tbody>
+        </table></div></div>
+      <div class="psec"><label style="font-weight:600;font-size:13px;">Product Photos</label>
+        ${tColors.map(c=>`<div style="margin-top:12px;">
+          <div style="font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:9px;height:9px;border-radius:50%;background:${c.h};border:1px solid #ccc;"></div>${c.n}</div>
+          <div class="pgr">
+            ${((p.photos[c.n]||[])).slice(0,3).map((url,i)=>`<div class="psl"><img src="${url}" id="pv-${c.n}-${i}"><input type="file" accept="image/*" onchange="upPho(event,'${c.n}',${i},${id||'null'})"></div>`).join('')}
+            ${(p.photos[c.n]||[]).length<3?`<div class="psl"><span>+</span><input type="file" accept="image/*" onchange="upPho(event,'${c.n}',${(p.photos[c.n]||[]).length},${id||'null'})"></div>`:''}
+          </div></div>`).join('')}
+      </div>
+    </div>
+    <button class="btn bpri bful" style="margin-top:20px;" onclick="saveProd(${id||'null'})">${id?'💾 Update Model':'🚀 Publish Model'}</button>
+    ${id?`<button class="btn bred bful" style="margin-top:10px;" onclick="delProd(${id})">🗑 Remove Model</button>`:''}`;
 }
 
-window.openProductForm = function(id = null) {
-  if (!id && weeklyStats.products_this_week >= PRODUCT_LIMIT) {
-    toast('Weekly limit reached (3 models/week)');
-    return;
-  }
-  const p = id ? products.find(x => x.id === id) : { name:'', price:'', colors:[], sizes:[], stock:{}, photos:{} };
-  if (!p) return;
-  tempColors = id ? [...p.colors] : [];
-  tempSizes  = id ? [...p.sizes]  : [];
-  showModal();
-  renderProductFormContent(id, p);
-};
+window.tC=(n,h,id)=>{const i=tColors.findIndex(c=>c.n===n);if(i>-1)tColors.splice(i,1);else tColors.push({n,h});const p=id?products.find(x=>x.id===id):{name:'',price:'',colors:[],sizes:[],stock:{},photos:{}};renderPF(id,p);};
+window.tS=(s,id)=>{const i=tSizes.indexOf(s);if(i>-1)tSizes.splice(i,1);else tSizes.push(s);tSizes.sort((a,b)=>Number(a)-Number(b));const p=id?products.find(x=>x.id===id):{name:'',price:'',colors:[],sizes:[],stock:{},photos:{}};renderPF(id,p);};
 
-function renderProductFormContent(id, p) {
-  const body = document.getElementById('modal-body');
-  body.innerHTML = `
-    <div style="margin-bottom:20px;">
-      <h2 style="font-size:18px;">${id ? 'Edit Model' : 'Add New Model'}</h2>
-    </div>
-    <div class="form-group">
-      <label>Model Name</label>
-      <input class="form-input" type="text" id="f-name" value="${p.name}" placeholder="e.g. Air Max 2026">
-    </div>
-    <div class="form-group">
-      <label>Price (TND)</label>
-      <input class="form-input" type="number" id="f-price" value="${p.price}" placeholder="120">
-    </div>
-    <div class="form-group">
-      <label>Colors</label>
-      <div class="color-palette">
-        ${colorPalette.map(c => `
-          <div class="color-circle ${tempColors.some(tc => tc.name === c.name) ? 'selected' : ''}"
-            style="background:${c.hex};${c.hex==='#FFFFFF'?'border:1.5px solid #ddd;':''}"
-            onclick="toggleColor('${c.name}','${c.hex}',${id||'null'})"></div>`).join('')}
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Sizes (EU)</label>
-      <div class="size-selector">
-        ${sizePalette.map(s => `
-          <div class="size-chip ${tempSizes.includes(s) ? 'selected' : ''}"
-            onclick="toggleSize('${s}',${id||'null'})">${s}</div>`).join('')}
-      </div>
-    </div>
-    <div id="stock-section" class="${tempColors.length && tempSizes.length ? '' : 'hidden'}">
-      <div class="form-group">
-        <label>Stock</label>
-        <div class="stock-wrap">
-          <table class="stock-table">
-            <thead><tr><th>Color</th>${tempSizes.map(s=>`<th>${s}</th>`).join('')}</tr></thead>
-            <tbody>
-              ${tempColors.map(c => `
-                <tr>
-                  <td style="font-weight:700;">${c.name}</td>
-                  ${tempSizes.map(s => `
-                    <td><input type="number" class="stock-input" id="st-${c.name}-${s}"
-                      value="${(p.stock[c.name]||{})[s]||0}"></td>`).join('')}
-                </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="photo-section">
-        <label style="font-weight:600;font-size:13px;">Product Photos</label>
-        ${tempColors.map(c => `
-          <div style="margin-top:12px;">
-            <div style="font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-              <div style="width:8px;height:8px;border-radius:50%;background:${c.hex};border:1px solid #ddd;"></div>
-              ${c.name}
-            </div>
-            <div class="photo-grid">
-              ${((p.photos[c.name]||[])).slice(0,3).map((url,i) => `
-                <div class="photo-slot">
-                  <img src="${url}" id="preview-${c.name}-${i}">
-                  <input type="file" accept="image/*"
-                    onchange="uploadPhoto(event,'${c.name}',${i},${id||'null'})">
-                </div>`).join('')}
-              ${(p.photos[c.name]||[]).length < 3 ? `
-                <div class="photo-slot">
-                  <span>+</span>
-                  <input type="file" accept="image/*"
-                    onchange="uploadPhoto(event,'${c.name}',${(p.photos[c.name]||[]).length},${id||'null'})">
-                </div>` : ''}
-            </div>
-          </div>`).join('')}
-      </div>
-    </div>
-    <button class="btn btn-primary" style="width:100%;margin-top:20px;" onclick="saveProduct(${id||'null'})">
-      ${id ? '💾 Update Model' : '🚀 Publish Model'}
-    </button>
-    ${id ? `<button class="btn btn-danger-ghost" style="width:100%;margin-top:10px;" onclick="deleteProduct(${id})">
-      🗑 Remove Model</button>` : ''}`;
-}
-
-window.toggleColor = function(name, hex, id) {
-  const idx = tempColors.findIndex(c => c.name === name);
-  if (idx > -1) tempColors.splice(idx, 1);
-  else tempColors.push({ name, hex });
-  const p = id ? products.find(x => x.id === id) : { name:'', price:'', colors:[], sizes:[], stock:{}, photos:{} };
-  renderProductFormContent(id, p);
-};
-
-window.toggleSize = function(size, id) {
-  const idx = tempSizes.indexOf(size);
-  if (idx > -1) tempSizes.splice(idx, 1);
-  else tempSizes.push(size);
-  tempSizes.sort((a, b) => Number(a) - Number(b));
-  const p = id ? products.find(x => x.id === id) : { name:'', price:'', colors:[], sizes:[], stock:{}, photos:{} };
-  renderProductFormContent(id, p);
-};
-
-window.uploadPhoto = async function(event, colorName, photoIndex, productId) {
-  const file = event.target.files[0];
-  if (!file) return;
-  toast('Uploading photo…');
-  const ext  = file.name.split('.').pop();
-  const path = `${ownerStore.id}/${Date.now()}-${colorName}-${photoIndex}.${ext}`;
-  const { error: upErr } = await supabase.storage
-    .from('product-photos').upload(path, file, { upsert: true });
-  if (upErr) { toast('Upload failed: ' + upErr.message); return; }
-
-  const { data: urlData } = supabase.storage.from('product-photos').getPublicUrl(path);
-  const url = urlData.publicUrl;
-
-  // Update preview
-  const previewId = `preview-${colorName}-${photoIndex}`;
-  const preview   = document.getElementById(previewId);
-  if (preview) preview.src = url;
-  else {
-    // New slot — reflect in product's photos temporarily
-    const p = productId ? products.find(x => x.id === productId) : null;
-    if (p) {
-      if (!p.photos[colorName]) p.photos[colorName] = [];
-      p.photos[colorName][photoIndex] = url;
-    }
-  }
-
-  // Persist if editing existing product
-  if (productId) {
-    const p = products.find(x => x.id === productId);
-    if (p) {
-      if (!p.photos[colorName]) p.photos[colorName] = [];
-      p.photos[colorName][photoIndex] = url;
-      await supabase.from('products').update({ photos: p.photos, img: p.photos[Object.keys(p.photos)[0]][0] || p.img })
-        .eq('id', productId);
-    }
-  }
+window.upPho=async(ev,cn,idx,pid)=>{
+  const file=ev.target.files[0];if(!file)return;toast('Uploading…');
+  const ext=file.name.split('.').pop(),path=`${store.id}/${Date.now()}-${cn}-${idx}.${ext}`;
+  const{error:ue}=await sb.storage.from('product-photos').upload(path,file,{upsert:true});
+  if(ue){toast('Upload failed: '+ue.message);return;}
+  const{data:ud}=sb.storage.from('product-photos').getPublicUrl(path);
+  const url=ud.publicUrl;
+  const pv=document.getElementById(`pv-${cn}-${idx}`);if(pv)pv.src=url;
+  if(pid){const p=products.find(x=>x.id===pid);if(p){if(!p.photos[cn])p.photos[cn]=[];p.photos[cn][idx]=url;await sb.from('products').update({photos:p.photos,img:firstPhoto(p)}).eq('id',pid);}}
   toast('Photo uploaded ✅');
 };
 
-window.saveProduct = async function(id) {
-  const name  = document.getElementById('f-name').value.trim();
-  const price = parseFloat(document.getElementById('f-price').value);
-  if (!name || !price || tempColors.length === 0 || tempSizes.length === 0) {
-    toast('Fill name, price, and pick at least 1 color + 1 size');
-    return;
-  }
-
-  const stock = {};
-  tempColors.forEach(c => {
-    stock[c.name] = {};
-    tempSizes.forEach(s => {
-      const el = document.getElementById(`st-${c.name}-${s}`);
-      stock[c.name][s] = el ? parseInt(el.value) || 0 : 0;
-    });
-  });
-
-  // Build photos from existing + any new uploads
-  let photos = {};
-  if (id) {
-    const existing = products.find(x => x.id === id);
-    photos = existing ? { ...existing.photos } : {};
-  }
-  // Remove colors no longer selected
-  tempColors.forEach(c => { if (!photos[c.name]) photos[c.name] = []; });
-
-  const firstImg = (() => {
-    for (const c of tempColors) {
-      if ((photos[c.name] || []).length) return photos[c.name][0];
-    }
-    return 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=75';
-  })();
-
-  const payload = {
-    name, price, store_id: ownerStore.id,
-    colors: tempColors, sizes: tempSizes,
-    stock, photos, img: firstImg, is_active: true
-  };
-
-  if (id) {
-    const { error } = await supabase.from('products').update(payload).eq('id', id);
-    if (error) { toast('Save failed: ' + error.message); return; }
-    const idx = products.findIndex(x => x.id === id);
-    if (idx > -1) products[idx] = normalizeProduct({ ...products[idx], ...payload, id });
+window.saveProd=async(id)=>{
+  const name=G('fn').value.trim(),price=parseFloat(G('fp').value);
+  if(!name||!price||!tColors.length||!tSizes.length){toast('Fill name, price, and pick at least 1 color + 1 size');return;}
+  const stock={};
+  tColors.forEach(c=>{stock[c.n]={};tSizes.forEach(s=>{const el=document.getElementById(`st-${c.n}-${s}`);stock[c.n][s]=el?parseInt(el.value)||0:0;});});
+  let photos={};if(id){const ex=products.find(x=>x.id===id);if(ex)photos={...ex.photos};}
+  tColors.forEach(c=>{if(!photos[c.n])photos[c.n]=[];});
+  const img=firstPhoto({photos});
+  const pl={name,price,store_id:store.id,colors:tColors,sizes:tSizes,stock,photos,img,is_active:true};
+  if(id){
+    const{error}=await sb.from('products').update(pl).eq('id',id);
+    if(error){toast('Save failed: '+error.message);return;}
+    const i=products.findIndex(x=>x.id===id);if(i>-1)products[i]=norm({...products[i],...pl,id});
     toast('Model updated ✅');
-  } else {
-    const { data, error } = await supabase.from('products').insert(payload).select().single();
-    if (error) { toast('Save failed: ' + error.message); return; }
-    products.unshift(normalizeProduct(data));
-    weeklyStats.products_this_week++;
-    toast('Model published 🚀');
+  }else{
+    const{data,error}=await sb.from('products').insert(pl).select().single();
+    if(error){toast('Save failed: '+error.message);return;}
+    products.unshift(norm(data));weeklyStats.products_this_week++;toast('Model published 🚀');
   }
-
-  closeModal();
-  render();
+  window.closeModal();render();
 };
 
-window.deleteProduct = async function(id) {
-  if (!confirm('Remove this model from your store?')) return;
-  const { error } = await supabase.from('products').update({ is_active: false }).eq('id', id);
-  if (error) { toast('Delete failed'); return; }
-  products = products.filter(p => p.id !== id);
-  closeModal();
-  render();
-  toast('Model removed');
+window.delProd=async(id)=>{
+  if(!confirm('Remove this model?'))return;
+  const{error}=await sb.from('products').update({is_active:false}).eq('id',id);
+  if(error){toast('Delete failed');return;}
+  products=products.filter(p=>p.id!==id);window.closeModal();render();toast('Model removed');
 };
 
-// ══ OFFERS ══════════════════════════════════════════════
-function renderOffers(c) {
-  if (!offers.length) {
-    c.innerHTML = `<div class="empty"><div class="empty-icon">🏷️</div>No offers yet. Tap + to post your first offer.</div>`;
-    return;
-  }
-  c.innerHTML = offers.map(o => `
-    <div class="offer-card">
-      <img src="${o.bg}" class="offer-img">
-      <div class="offer-content">
-        <p style="font-size:14px;line-height:1.4;">${o.caption || o.title || ''}</p>
-        <div class="offer-actions-bar">
-          <div style="font-size:15px;">❤️ ${o.likes}</div>
-          <div style="display:flex;gap:14px;">
-            <span class="offer-edit" onclick="openOfferForm(${o.id})">Edit</span>
-            <span class="offer-del"  onclick="deleteOffer(${o.id})">Delete</span>
-          </div>
-        </div>
-      </div>
-    </div>`).join('');
+// ══ OFFERS
+function renderOffers(c){
+  if(!offers.length){c.innerHTML='<div class="empty"><div class="eic">🏷️</div>No offers yet.<br>Tap + to post your first offer.</div>';return;}
+  c.innerHTML=offers.map(o=>`<div class="ofcard">
+    <img src="${o.bg||'https://placehold.co/400x300?text=Offer'}" class="ofimg" onerror="this.src='https://placehold.co/400x300?text=Offer'">
+    <div class="ofbody">
+      <div style="font-size:12px;font-weight:700;color:#d97706;margin-bottom:4px;">${o.badge||''}</div>
+      <div style="font-size:14px;font-weight:700;">${o.title||''}</div>
+      <div style="font-size:13px;color:var(--gray);margin-top:3px;">${o.caption||o.sub||''}</div>
+      <div class="ofbar"><div>❤️ ${o.likes||0}</div>
+        <div style="display:flex;gap:14px;">
+          <span style="font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;" onclick="openOfferForm(${o.id})">Edit</span>
+          <span style="font-size:12px;font-weight:700;color:var(--red);cursor:pointer;"  onclick="delOffer(${o.id})">Delete</span>
+        </div></div></div></div>`).join('');
 }
 
-window.openOfferForm = function(id = null) {
-  if (!id && weeklyStats.offers_this_week >= OFFER_LIMIT) {
-    toast('Weekly limit: 1 offer per week');
-    return;
-  }
-  const o = id ? offers.find(x => x.id === id)
-    : { bg: '', caption: '', badge: '', title: '', sub: '' };
+window.openOfferForm=function(id=null){
+  if(!id&&weeklyStats.offers_this_week>=OLIM){toast('Weekly limit: 1 offer/week');return;}
+  const o=id?offers.find(x=>x.id===id):{bg:'',badge:'',title:'',caption:''};
   showModal();
-  document.getElementById('modal-body').innerHTML = `
-    <h2 style="font-size:18px;margin-bottom:20px;">${id ? 'Edit Offer' : 'New Offer'}</h2>
-    <div class="form-group">
-      <label>Offer Photo</label>
-      <div class="photo-slot" style="width:100%;height:160px;border-radius:12px;margin-bottom:10px;" onclick="document.getElementById('offer-file').click()">
-        <img src="${o.bg || 'https://placehold.co/400x300?text=Tap+to+upload'}" id="offer-img-preview" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">
+  G('mb').innerHTML=`
+    <h2 style="font-size:18px;margin-bottom:20px;">${id?'Edit Offer':'New Offer'}</h2>
+    <div class="fg"><label>Offer Photo</label>
+      <div class="psl" style="width:100%;height:160px;border-radius:12px;margin-bottom:10px;" onclick="G('of-f').click()">
+        <img src="${o.bg||'https://placehold.co/400x300?text=Tap+to+upload'}" id="of-p" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">
       </div>
-      <input id="offer-file" type="file" accept="image/*" style="display:none;" onchange="previewOfferPhoto(event)">
-      <button class="btn btn-outline" style="font-size:12px;padding:8px;" onclick="document.getElementById('offer-file').click()">📸 Upload Photo</button>
+      <input id="of-f" type="file" accept="image/*" style="display:none;" onchange="prvOf(event)">
+      <button class="btn bout" style="font-size:12px;padding:9px;" onclick="G('of-f').click()">📸 Change Photo</button>
     </div>
-    <div class="form-group">
-      <label>Badge (e.g. Flash Sale)</label>
-      <input class="form-input" type="text" id="o-badge" value="${o.badge||''}" placeholder="Flash Sale">
-    </div>
-    <div class="form-group">
-      <label>Title</label>
-      <input class="form-input" type="text" id="o-title" value="${o.title||''}" placeholder="Up to 50% Off All Sneakers">
-    </div>
-    <div class="form-group">
-      <label>Subtitle / Caption</label>
-      <textarea class="form-input" id="o-caption" rows="2" placeholder="Today only · Free delivery…">${o.caption||o.sub||''}</textarea>
-    </div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveOffer(${id||'null'})">
-      ${id ? '💾 Update Offer' : '📢 Post Offer'}
-    </button>`;
+    <div class="fg"><label>Badge</label><input class="fi" id="ob" value="${o.badge||''}" placeholder="Flash Sale"></div>
+    <div class="fg"><label>Title</label><input class="fi" id="ot" value="${o.title||''}" placeholder="Up to 50% off sneakers!"></div>
+    <div class="fg"><label>Caption</label><textarea class="fi" id="oc" rows="2" placeholder="Today only · Free delivery…">${o.caption||o.sub||''}</textarea></div>
+    <button class="btn bpri bful" onclick="saveOffer(${id||'null'})">${id?'💾 Update Offer':'📢 Post Offer'}</button>`;
 };
-
-window.previewOfferPhoto = function(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => { document.getElementById('offer-img-preview').src = e.target.result; };
-  reader.readAsDataURL(file);
-};
-
-window.saveOffer = async function(id) {
-  const badge   = document.getElementById('o-badge').value.trim();
-  const title   = document.getElementById('o-title').value.trim();
-  const caption = document.getElementById('o-caption').value.trim();
-  if (!title) { toast('Please enter a title'); return; }
-
-  // Upload photo if selected
-  let bgUrl = id ? offers.find(x => x.id === id)?.bg || '' : '';
-  const fileInput = document.getElementById('offer-file');
-  if (fileInput.files[0]) {
-    toast('Uploading photo…');
-    const file = fileInput.files[0];
-    const ext  = file.name.split('.').pop();
-    const path = `${ownerStore.id}/offer-${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage
-      .from('product-photos').upload(path, file, { upsert: true });
-    if (upErr) { toast('Photo upload failed'); return; }
-    const { data: urlData } = supabase.storage.from('product-photos').getPublicUrl(path);
-    bgUrl = urlData.publicUrl;
+window.prvOf=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{G('of-p').src=ev.target.result;};r.readAsDataURL(f);};
+window.saveOffer=async(id)=>{
+  const badge=G('ob').value.trim(),title=G('ot').value.trim(),caption=G('oc').value.trim();
+  if(!title){toast('Please enter a title');return;}
+  let bgUrl=id?offers.find(x=>x.id===id)?.bg||'':'';
+  const fi=G('of-f');
+  if(fi.files[0]){
+    toast('Uploading…');const file=fi.files[0],ext=file.name.split('.').pop(),path=`${store.id}/offer-${Date.now()}.${ext}`;
+    const{error:ue}=await sb.storage.from('product-photos').upload(path,file,{upsert:true});
+    if(ue){toast('Photo upload failed');return;}
+    const{data:ud}=sb.storage.from('product-photos').getPublicUrl(path);bgUrl=ud.publicUrl;
   }
-  if (!bgUrl) { toast('Please upload a photo'); return; }
-
-  const payload = { store_id: ownerStore.id, badge, title, sub: caption, caption, bg: bgUrl };
-
-  if (id) {
-    const { error } = await supabase.from('store_offers').update(payload).eq('id', id);
-    if (error) { toast('Update failed'); return; }
-    const idx = offers.findIndex(x => x.id === id);
-    if (idx > -1) offers[idx] = { ...offers[idx], ...payload };
-    toast('Offer updated ✅');
-  } else {
-    const { data, error } = await supabase.from('store_offers').insert(payload).select().single();
-    if (error) { toast('Post failed: ' + error.message); return; }
-    offers.unshift(data);
-    weeklyStats.offers_this_week++;
-    toast('Offer posted 📢');
+  if(!bgUrl){toast('Please upload a photo');return;}
+  const pl={store_id:store.id,badge,title,sub:caption,caption,bg:bgUrl};
+  if(id){
+    const{error}=await sb.from('store_offers').update(pl).eq('id',id);
+    if(error){toast('Update failed');return;}
+    const i=offers.findIndex(x=>x.id===id);if(i>-1)offers[i]={...offers[i],...pl};toast('Offer updated ✅');
+  }else{
+    const{data,error}=await sb.from('store_offers').insert(pl).select().single();
+    if(error){toast('Post failed: '+error.message);return;}
+    offers.unshift(data);weeklyStats.offers_this_week++;toast('Offer posted 📢');
   }
-  closeModal();
-  render();
+  window.closeModal();render();
+};
+window.delOffer=async(id)=>{
+  if(!confirm('Delete this offer?'))return;
+  const{error}=await sb.from('store_offers').delete().eq('id',id);
+  if(error){toast('Delete failed');return;}
+  offers=offers.filter(o=>o.id!==id);render();toast('Offer deleted');
 };
 
-window.deleteOffer = async function(id) {
-  if (!confirm('Delete this offer?')) return;
-  const { error } = await supabase.from('store_offers').delete().eq('id', id);
-  if (error) { toast('Delete failed'); return; }
-  offers = offers.filter(o => o.id !== id);
-  render();
-  toast('Offer deleted');
-};
-
-// ══ ACCOUNT ═════════════════════════════════════════════
-function renderAccount(c) {
-  c.innerHTML = `
-    <div class="profile-hd">
-      <img src="${ownerStore.img}" class="profile-photo" id="store-photo"
-        onclick="document.getElementById('photo-file').click()">
-      <input id="photo-file" type="file" accept="image/*" style="display:none;"
-        onchange="uploadStorePhoto(event)">
-      <div class="profile-name">${ownerStore.name}</div>
-      <div class="profile-tag">${ownerStore.tag} · ${ownerStore.followers} followers ⭐ ${ownerStore.rating}</div>
-    </div>
-    <div class="acct-list">
-      <div class="acct-item" onclick="openEditStore()">
-        <div class="acct-item-left">
-          <span class="acct-icon">🏪</span>
-          <span class="acct-label">Edit Store Profile</span>
-        </div>
-        <span class="acct-arrow">›</span>
-      </div>
-      <div class="acct-item" onclick="toast('Coming soon')">
-        <div class="acct-item-left">
-          <span class="acct-icon">📊</span>
-          <span class="acct-label">Analytics</span>
-        </div>
-        <span class="acct-arrow">›</span>
-      </div>
-      <div class="acct-item" onclick="toast('Coming soon')">
-        <div class="acct-item-left">
-          <span class="acct-icon">🔔</span>
-          <span class="acct-label">Notifications</span>
-        </div>
-        <span class="acct-arrow">›</span>
-      </div>
-      <div class="acct-item" onclick="toast('Coming soon')">
-        <div class="acct-item-left">
-          <span class="acct-icon">❓</span>
-          <span class="acct-label">Help & Support</span>
-        </div>
-        <span class="acct-arrow">›</span>
-      </div>
-      <div class="acct-item" style="border-color:#ffebee;" onclick="doLogout()">
-        <div class="acct-item-left">
-          <span class="acct-icon">🚪</span>
-          <span class="acct-label" style="color:var(--red);">Sign Out</span>
-        </div>
-      </div>
-    </div>
-    <div style="text-align:center;margin-top:24px;color:var(--gray);font-size:11px;">
-      SelemExpress Pro · Store ID: ${ownerStore.id}
-    </div>`;
+// ══ ACCOUNT
+function renderAccount(c){
+  c.innerHTML=`<div class="phd">
+    <img src="${store.img}" class="ppho" id="spho" onclick="G('phof').click()" onerror="this.src='https://placehold.co/92?text=Store'">
+    <input id="phof" type="file" accept="image/*" style="display:none;" onchange="upSPho(event)">
+    <div class="pnm">${store.name}</div>
+    <div class="ptg">${store.tag} · ${store.followers} followers · ⭐ ${store.rating}</div>
+  </div>
+  <div class="alist">
+    <div class="aitem" onclick="editStore()"><div class="aiL"><span class="aic">🏪</span><span class="albl">Edit Store Profile</span></div><span style="color:#ccc;font-size:18px;">›</span></div>
+    <div class="aitem" onclick="toast('Analytics coming soon')"><div class="aiL"><span class="aic">📊</span><span class="albl">Analytics</span></div><span style="color:#ccc;font-size:18px;">›</span></div>
+    <div class="aitem" onclick="toast('Notifications coming soon')"><div class="aiL"><span class="aic">🔔</span><span class="albl">Notifications</span></div><span style="color:#ccc;font-size:18px;">›</span></div>
+    <div class="aitem" onclick="toast('Help coming soon')"><div class="aiL"><span class="aic">❓</span><span class="albl">Help & Support</span></div><span style="color:#ccc;font-size:18px;">›</span></div>
+    <div class="aitem" style="border-color:#fee2e2;" onclick="doLogout()"><div class="aiL"><span class="aic">🚪</span><span class="albl" style="color:var(--red);">Sign Out</span></div></div>
+  </div>
+  <div style="text-align:center;margin-top:20px;color:var(--gray);font-size:11px;">SelemExpress Pro · Store #${store.id}</div>`;
 }
-
-window.uploadStorePhoto = async function(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  toast('Uploading…');
-  const ext  = file.name.split('.').pop();
-  const path = `stores/${ownerStore.id}/logo.${ext}`;
-  const { error } = await supabase.storage.from('product-photos').upload(path, file, { upsert: true });
-  if (error) { toast('Upload failed'); return; }
-  const { data } = supabase.storage.from('product-photos').getPublicUrl(path);
-  ownerStore.img = data.publicUrl;
-  await supabase.from('stores').update({ img: ownerStore.img }).eq('id', ownerStore.id);
-  document.getElementById('store-photo').src = ownerStore.img;
-  toast('Store photo updated ✅');
+window.upSPho=async(e)=>{
+  const file=e.target.files[0];if(!file)return;toast('Uploading…');
+  const ext=file.name.split('.').pop(),path=`stores/${store.id}/logo.${ext}`;
+  const{error}=await sb.storage.from('product-photos').upload(path,file,{upsert:true});
+  if(error){toast('Upload failed');return;}
+  const{data:ud}=sb.storage.from('product-photos').getPublicUrl(path);
+  store.img=ud.publicUrl;
+  await sb.from('stores').update({img:store.img}).eq('id',store.id);
+  G('spho').src=store.img;toast('Store photo updated ✅');
 };
-
-window.openEditStore = function() {
+window.editStore=()=>{
   showModal();
-  document.getElementById('modal-body').innerHTML = `
-    <h2 style="font-size:18px;margin-bottom:20px;">Edit Store Profile</h2>
-    <div class="form-group">
-      <label>Store Name</label>
-      <input class="form-input" id="s-name" value="${ownerStore.name}">
-    </div>
-    <div class="form-group">
-      <label>Category</label>
-      <input class="form-input" id="s-tag" value="${ownerStore.tag}">
-    </div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveStoreProfile()">💾 Save Changes</button>`;
+  G('mb').innerHTML=`<h2 style="font-size:18px;margin-bottom:20px;">Edit Store Profile</h2>
+    <div class="fg"><label>Store Name</label><input class="fi" id="sn" value="${store.name}"></div>
+    <div class="fg"><label>Category</label><input class="fi" id="st" value="${store.tag}"></div>
+    <button class="btn bpri bful" onclick="saveSP()">💾 Save Changes</button>`;
+};
+window.saveSP=async()=>{
+  const name=G('sn').value.trim(),tag=G('st').value.trim();
+  if(!name){toast('Store name required');return;}
+  const{error}=await sb.from('stores').update({name,tag}).eq('id',store.id);
+  if(error){toast('Save failed');return;}
+  store.name=name;store.tag=tag;window.closeModal();render();toast('Profile updated ✅');
 };
 
-window.saveStoreProfile = async function() {
-  const name = document.getElementById('s-name').value.trim();
-  const tag  = document.getElementById('s-tag').value.trim();
-  if (!name) { toast('Store name required'); return; }
-  const { error } = await supabase.from('stores').update({ name, tag }).eq('id', ownerStore.id);
-  if (error) { toast('Save failed'); return; }
-  ownerStore.name = name;
-  ownerStore.tag  = tag;
-  closeModal();
-  render();
-  toast('Profile updated ✅');
-};
-
-// ── Also expose toast globally ───────────────────────────
-window.toast = toast;
-
-// ── REAL-TIME: listen for new orders ─────────────────────
-function subscribeOrders() {
-  if (!ownerStore) return;
-  supabase.channel('orders-' + ownerStore.id)
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'orders',
-      filter: `store_id=eq.${ownerStore.id}`
-    }, payload => {
-      orders.unshift(payload.new);
-      toast('🛎️ New order received!', 4000);
-      if (currentTab === 'orders') render();
-    })
-    .subscribe();
+// ── REALTIME
+function subOrders(){
+  sb.channel('ord-'+store.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'orders',filter:`store_id=eq.${store.id}`},p=>{
+    orders.unshift(p.new);toast('🛎️ New order received!',4000);if(tab==='orders')render();
+  }).subscribe();
 }
 
-supabase.auth.onAuthStateChange(async (_event, session) => {
-  if (session?.user && ownerStore) subscribeOrders();
-});
-
-// Initial auth check
-(async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    hideLoader();
-    showAuthScreen();
-  }
-})();
+window.G=G;window.toast=toast;
 </script>
 </body>
 </html>
