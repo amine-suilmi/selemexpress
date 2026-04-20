@@ -270,23 +270,46 @@ async function loadData(uid){
   subOrders();
 }
 
-// ── AUTH STATE
-let _loading = false;  // guard against concurrent loads
-sb.auth.onAuthStateChange(async(event,session)=>{
-  if(session?.user&&(event==='SIGNED_IN'||event==='INITIAL_SESSION')){
-    if(_loading) return;          // already loading, skip
-    if(store && event==='INITIAL_SESSION') return; // already loaded
-    _loading=true;
-    me=session.user;loader(true);
+// ── AUTH STATE ─────────────────────────────────────────────────────
+// DESIGN: getSession() is the ONLY boot path.
+// onAuthStateChange only handles explicit SIGNED_IN / SIGNED_OUT.
+// This prevents double-loads from INITIAL_SESSION firing alongside getSession().
+// It also prevents re-loads when the browser returns from the camera/gallery
+// picker (which fires TOKEN_REFRESHED, not SIGNED_IN).
+
+sb.auth.onAuthStateChange(async(event, session)=>{
+  if(event === 'SIGNED_IN' && session?.user){
+    // Only fires after a real login action (doLogin / doRegister)
+    // Not on page load, not on tab focus, not on token refresh
+    me = session.user;
+    loader(true);
     await loadData(me.id);
-    _loading=false;
-  } else if(event==='SIGNED_OUT'||event==='USER_DELETED'){
-    _loading=false;store=null;showAuth();loader(false);
-  } else if(event==='TOKEN_REFRESHED'&&session?.user){
-    me=session.user; // keep me in sync after token refresh, no reload needed
   }
+  else if(event === 'SIGNED_OUT' || event === 'USER_DELETED'){
+    me = null; store = null;
+    products = []; offers = []; orders = [];
+    showAuth();
+    loader(false);
+  }
+  else if(event === 'TOKEN_REFRESHED' && session?.user){
+    // Token silently refreshed (e.g. after returning from camera)
+    // Just update me, do NOT reload data
+    me = session.user;
+  }
+  // INITIAL_SESSION is intentionally ignored here — handled by getSession() below
 });
-(async()=>{const{data:{session}}=await sb.auth.getSession();if(!session){loader(false);showAuth();}})();
+
+// Single boot entry point
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    me = session.user;
+    await loadData(me.id);  // loader is already shown from initial HTML
+  } else {
+    loader(false);
+    showAuth();
+  }
+})();
 
 // ── TAB
 window.goTab=function(t,btn){
@@ -395,10 +418,19 @@ function renderPF(id,p){
           <div style="font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
             <div style="width:9px;height:9px;border-radius:50%;background:${c.h};border:1px solid #ccc;"></div>${c.n}</div>
           <div class="pgr">
-            ${((p.photos[c.n]||[])).slice(0,3).map((url,i)=>`<div class="psl"><img src="${url}" id="pv-${c.n}-${i}"><input type="file" accept="image/*" onchange="upPho(event,'${c.n}',${i},${id||'null'})"></div>`).join('')}
-            ${(p.photos[c.n]||[]).length<3?`<div class="psl"><span>+</span><input type="file" accept="image/*" onchange="upPho(event,'${c.n}',${(p.photos[c.n]||[]).length},${id||'null'})"></div>`:''}
+            ${((p.photos[c.n]||[])).slice(0,3).map((url,i)=>`
+              <div class="psl" onclick="pickPhoto('${c.n}',${i},${id||'null'})">
+                <img src="${url}" id="pv-${c.n}-${i}">
+              </div>`).join('')}
+            ${(p.photos[c.n]||[]).length<3?`
+              <div class="psl" onclick="pickPhoto('${c.n}',${(p.photos[c.n]||[]).length},${id||'null'})">
+                <span style="font-size:22px;color:#999;">+</span>
+              </div>`:''}
           </div></div>`).join('')}
       </div>
+      <!-- Single hidden file input, reused for all photo slots -->
+      <input id="photo-picker" type="file" accept="image/*" style="display:none;"
+        onchange="onPhotoChosen(event)">
     </div>
     <button class="btn bpri bful" style="margin-top:20px;" onclick="saveProd(${id||'null'})">${id?'💾 Update Model':'🚀 Publish Model'}</button>
     ${id?`<button class="btn bred bful" style="margin-top:10px;" onclick="delProd(${id})">🗑 Remove Model</button>`:''}`;
@@ -407,17 +439,41 @@ function renderPF(id,p){
 window.tC=(n,h,id)=>{const i=tColors.findIndex(c=>c.n===n);if(i>-1)tColors.splice(i,1);else tColors.push({n,h});const p=id?products.find(x=>x.id===id):{name:'',price:'',colors:[],sizes:[],stock:{},photos:{}};renderPF(id,p);};
 window.tS=(s,id)=>{const i=tSizes.indexOf(s);if(i>-1)tSizes.splice(i,1);else tSizes.push(s);tSizes.sort((a,b)=>Number(a)-Number(b));const p=id?products.find(x=>x.id===id):{name:'',price:'',colors:[],sizes:[],stock:{},photos:{}};renderPF(id,p);};
 
-window.upPho=async(ev,cn,idx,pid)=>{
-  const file=ev.target.files[0];if(!file)return;toast('Uploading…');
-  // Refresh session to ensure token is valid before uploading
-  await sb.auth.getSession();
-  const ext=file.name.split('.').pop(),path=`${store.id}/${Date.now()}-${cn}-${idx}.${ext}`;
+// Single photo picker state — avoids multiple file inputs fighting each other
+let _pickCn=null, _pickIdx=null, _pickPid=null;
+window.pickPhoto=(cn,idx,pid)=>{
+  _pickCn=cn; _pickIdx=idx; _pickPid=pid;
+  const fi=G('photo-picker');
+  fi.value=''; // reset so same file can be re-selected
+  fi.click();
+};
+window.onPhotoChosen=async(ev)=>{
+  const file=ev.target.files[0];
+  if(!file||!_pickCn) return;
+  const cn=_pickCn, idx=_pickIdx, pid=_pickPid;
+  _pickCn=null; // reset immediately
+  toast('Uploading…');
+  // Refresh session silently — does NOT trigger onAuthStateChange
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session){toast('Session expired — please sign in again');return;}
+  const ext=file.name.split('.').pop();
+  const path=`${store.id}/${Date.now()}-${cn}-${idx}.${ext}`;
   const{error:ue}=await sb.storage.from('product-photos').upload(path,file,{upsert:true});
   if(ue){toast('Upload failed: '+ue.message);return;}
   const{data:ud}=sb.storage.from('product-photos').getPublicUrl(path);
   const url=ud.publicUrl;
-  const pv=document.getElementById(`pv-${cn}-${idx}`);if(pv)pv.src=url;
-  if(pid){const p=products.find(x=>x.id===pid);if(p){if(!p.photos[cn])p.photos[cn]=[];p.photos[cn][idx]=url;await sb.from('products').update({photos:p.photos,img:firstPhoto(p)}).eq('id',pid);}}
+  // Update preview
+  const pv=document.getElementById(`pv-${cn}-${idx}`);
+  if(pv) pv.src=url;
+  // Persist if editing existing product
+  if(pid){
+    const p=products.find(x=>x.id===pid);
+    if(p){
+      if(!p.photos[cn])p.photos[cn]=[];
+      p.photos[cn][idx]=url;
+      await sb.from('products').update({photos:p.photos,img:firstPhoto(p)}).eq('id',pid);
+    }
+  }
   toast('Photo uploaded ✅');
 };
 
@@ -477,13 +533,14 @@ window.openOfferForm=function(id=null){
         <img src="${o.bg||'https://placehold.co/400x300?text=Tap+to+upload'}" id="of-p" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">
       </div>
       <input id="of-f" type="file" accept="image/*" style="display:none;" onchange="prvOf(event)">
-      <button class="btn bout" style="font-size:12px;padding:9px;" onclick="G('of-f').click()">📸 Change Photo</button>
+      <button class="btn bout" style="font-size:12px;padding:9px;" onclick="ofPickPhoto()">📸 Change Photo</button>
     </div>
     <div class="fg"><label>Badge</label><input class="fi" id="ob" value="${o.badge||''}" placeholder="Flash Sale"></div>
     <div class="fg"><label>Title</label><input class="fi" id="ot" value="${o.title||''}" placeholder="Up to 50% off sneakers!"></div>
     <div class="fg"><label>Caption</label><textarea class="fi" id="oc" rows="2" placeholder="Today only · Free delivery…">${o.caption||o.sub||''}</textarea></div>
     <button class="btn bpri bful" onclick="saveOffer(${id||'null'})">${id?'💾 Update Offer':'📢 Post Offer'}</button>`;
 };
+window.ofPickPhoto=()=>{const fi=G('of-f');fi.value='';fi.click();};
 window.prvOf=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{G('of-p').src=ev.target.result;};r.readAsDataURL(f);};
 window.saveOffer=async(id)=>{
   const badge=G('ob').value.trim(),title=G('ot').value.trim(),caption=G('oc').value.trim();
@@ -521,7 +578,7 @@ window.delOffer=async(id)=>{
 // ══ ACCOUNT
 function renderAccount(c){
   c.innerHTML=`<div class="phd">
-    <img src="${store.img}" class="ppho" id="spho" onclick="G('phof').click()" onerror="this.src='https://placehold.co/92?text=Store'">
+    <img src="${store.img}" class="ppho" id="spho" onclick="sPhoPick()" onerror="this.src='https://placehold.co/92?text=Store'">
     <input id="phof" type="file" accept="image/*" style="display:none;" onchange="upSPho(event)">
     <div class="pnm">${store.name}</div>
     <div class="ptg">${store.tag} · ${store.followers} followers · ⭐ ${store.rating}</div>
@@ -535,9 +592,11 @@ function renderAccount(c){
   </div>
   <div style="text-align:center;margin-top:20px;color:var(--gray);font-size:11px;">SelemExpress Pro · Store #${store.id}</div>`;
 }
+window.sPhoPick=()=>{const fi=G('phof');fi.value='';fi.click();};
 window.upSPho=async(e)=>{
   const file=e.target.files[0];if(!file)return;toast('Uploading…');
-  await sb.auth.getSession(); // refresh token
+  const{data:{session}}=await sb.auth.getSession();
+  if(!session){toast('Session expired — please sign in again');return;}
   const ext=file.name.split('.').pop(),path=`stores/${store.id}/logo.${ext}`;
   const{error}=await sb.storage.from('product-photos').upload(path,file,{upsert:true});
   if(error){toast('Upload failed');return;}
