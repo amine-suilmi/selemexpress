@@ -253,61 +253,102 @@ function showApp(){
 }
 
 // ── LOAD DATA
-async function loadData(uid){
-  const{data:row,error:err}=await sb.from('store_owners').select('store_id,stores(*)').eq('user_id',uid).single();
-  if(err||!row){loader(false);showAuth();setErr('No store linked. Please register your store.');return;}
-  store=row.stores;
-  const[pR,oR,ordR,stR]=await Promise.all([
-    sb.from('products').select('*').eq('store_id',store.id).eq('is_active',true).order('created_at',{ascending:false}),
-    sb.from('store_offers').select('*').eq('store_id',store.id).order('created_at',{ascending:false}),
-    sb.from('orders').select('*').eq('store_id',store.id).order('created_at',{ascending:false}),
-    sb.from('store_weekly_stats').select('*').eq('store_id',store.id).single(),
-  ]);
-  products=(pR.data||[]).map(norm);offers=oR.data||[];orders=ordR.data||[];
-  weeklyStats=stR.data||{products_this_week:0,offers_this_week:0};
-  showApp();
-  goTab('orders',document.querySelector('.ni[data-t="orders"]'));
-  subOrders();
+// ── LOAD DATA ───────────────────────────────────────────────────────
+let _realtimeChannel = null; // track so we don't stack duplicate subscriptions
+
+async function loadData(uid) {
+  // Hard timeout — if anything hangs, bail after 12 seconds
+  const timeout = setTimeout(() => {
+    loader(false);
+    showAuth();
+    setErr('Connection timed out. Please check your internet and try again.');
+  }, 12000);
+
+  try {
+    // Step 1: get store ownership
+    const { data: row, error: ownerErr } = await sb
+      .from('store_owners')
+      .select('store_id, stores(*)')
+      .eq('user_id', uid)
+      .single();
+
+    if (ownerErr || !row) {
+      clearTimeout(timeout);
+      loader(false);
+      showAuth();
+      setErr('No store linked to this account. Please register your store.');
+      return;
+    }
+    store = row.stores;
+
+    // Step 2: load store data — each query is independent, failures are non-fatal
+    const [pR, oR, ordR, stR] = await Promise.all([
+      sb.from('products').select('*').eq('store_id', store.id).eq('is_active', true).order('created_at', { ascending: false }),
+      sb.from('store_offers').select('*').eq('store_id', store.id).order('created_at', { ascending: false }),
+      sb.from('orders').select('*').eq('store_id', store.id).order('created_at', { ascending: false }),
+      sb.from('store_weekly_stats').select('*').eq('store_id', store.id).single(),
+    ]);
+
+    products    = (pR.data   || []).map(norm);
+    offers      = oR.data    || [];
+    orders      = ordR.data  || [];
+    weeklyStats = stR.data   || { products_this_week: 0, offers_this_week: 0 };
+
+    clearTimeout(timeout);
+    showApp();
+    goTab('orders', document.querySelector('.ni[data-t="orders"]'));
+    subOrders();
+
+  } catch (e) {
+    clearTimeout(timeout);
+    loader(false);
+    showAuth();
+    setErr('Failed to load store data: ' + (e.message || 'Unknown error'));
+  }
 }
 
-// ── AUTH STATE ─────────────────────────────────────────────────────
-// DESIGN: getSession() is the ONLY boot path.
-// onAuthStateChange only handles explicit SIGNED_IN / SIGNED_OUT.
-// This prevents double-loads from INITIAL_SESSION firing alongside getSession().
-// It also prevents re-loads when the browser returns from the camera/gallery
-// picker (which fires TOKEN_REFRESHED, not SIGNED_IN).
-
-sb.auth.onAuthStateChange(async(event, session)=>{
-  if(event === 'SIGNED_IN' && session?.user){
-    // Only fires after a real login action (doLogin / doRegister)
-    // Not on page load, not on tab focus, not on token refresh
+// ── AUTH STATE ──────────────────────────────────────────────────────
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session?.user) {
     me = session.user;
     loader(true);
     await loadData(me.id);
   }
-  else if(event === 'SIGNED_OUT' || event === 'USER_DELETED'){
+  else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
     me = null; store = null;
     products = []; offers = []; orders = [];
+    if (_realtimeChannel) { sb.removeChannel(_realtimeChannel); _realtimeChannel = null; }
     showAuth();
     loader(false);
   }
-  else if(event === 'TOKEN_REFRESHED' && session?.user){
-    // Token silently refreshed (e.g. after returning from camera)
-    // Just update me, do NOT reload data
-    me = session.user;
+  else if (event === 'TOKEN_REFRESHED' && session?.user) {
+    me = session.user; // silent token refresh — no reload needed
   }
-  // INITIAL_SESSION is intentionally ignored here — handled by getSession() below
+  // INITIAL_SESSION ignored — handled by getSession() boot below
 });
 
-// Single boot entry point
+// ── BOOT ────────────────────────────────────────────────────────────
 (async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session?.user) {
-    me = session.user;
-    await loadData(me.id);  // loader is already shown from initial HTML
-  } else {
+  try {
+    // refreshSession() asks the server to validate + refresh the token.
+    // Unlike getSession() which just reads localStorage, this actually
+    // checks if the token is still valid — fixing the "stale session" bug.
+    const { data, error } = await sb.auth.refreshSession();
+
+    if (error || !data.session) {
+      // Token is expired or invalid — clear it and show login
+      await sb.auth.signOut();   // clears the bad token from localStorage
+      loader(false);
+      showAuth();
+    } else {
+      me = data.session.user;
+      await loadData(me.id);
+    }
+  } catch (e) {
+    // Network failure — show login rather than infinite spinner
     loader(false);
     showAuth();
+    setErr('Could not connect. Check your internet connection.');
   }
 })();
 
@@ -620,11 +661,23 @@ window.saveSP=async()=>{
   store.name=name;store.tag=tag;window.closeModal();render();toast('Profile updated ✅');
 };
 
-// ── REALTIME
-function subOrders(){
-  sb.channel('ord-'+store.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'orders',filter:`store_id=eq.${store.id}`},p=>{
-    orders.unshift(p.new);toast('🛎️ New order received!',4000);if(tab==='orders')render();
-  }).subscribe();
+// ── REALTIME ────────────────────────────────────────────────────────
+function subOrders() {
+  // Remove any existing channel before creating a new one
+  if (_realtimeChannel) {
+    sb.removeChannel(_realtimeChannel);
+    _realtimeChannel = null;
+  }
+  _realtimeChannel = sb.channel('ord-' + store.id)
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'orders',
+      filter: `store_id=eq.${store.id}`
+    }, payload => {
+      orders.unshift(payload.new);
+      toast('🛎️ New order received!', 4000);
+      if (tab === 'orders') render();
+    })
+    .subscribe();
 }
 
 window.G=G;window.toast=toast;
