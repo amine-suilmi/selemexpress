@@ -7,8 +7,8 @@ export let storeProducts   = {};   // thumbnails map
 export let shoePool        = [];
 export let slides          = [];
 export let posterPool      = [];
-export const categories    = ["All","Sneakers","Sport","Boots","Sandals","Casual","Luxury","Kids","Classic"];
-export const sizes         = [36,37,38,39,40,41,42,43,44,45];
+export const categories    = ["All","Streetwear","Luxury","Minimalist","Resort","Avant-garde","Heritage","Essentials","Designer"];
+export const sizes         = ["XS","S","M","L","XL","XXL"];
 export const colorSwatches = ['#1a1a1a','#ffffff','#e8192c','#1565c0','#16a34a','#d97706','#9333ea','#a8a29e'];
 
 export const followedStores = new Set();

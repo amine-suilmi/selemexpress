@@ -172,7 +172,7 @@ let weeklyStats={products_this_week:0,offers_this_week:0};
 let tColors=[],tSizes=[];
 const PLIM=3,OLIM=1;
 const CPAL=[{n:'Black',h:'#000'},{n:'White',h:'#FFF'},{n:'Red',h:'#F44336'},{n:'Blue',h:'#2196F3'},{n:'Green',h:'#4CAF50'},{n:'Yellow',h:'#FFEB3B'},{n:'Gray',h:'#9E9E9E'},{n:'Brown',h:'#795548'},{n:'Pink',h:'#E91E63'}];
-const SPAL=['36','37','38','39','40','41','42','43','44','45','46'];
+const SPAL=['XS','S','M','L','XL','XXL','XXXL'];
 const G=id=>document.getElementById(id);
 const toast=(m,d=2500)=>{const e=G('toast');e.textContent=m;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),d);};
 const loader=(v)=>G('loader').classList.toggle('gone',!v);
